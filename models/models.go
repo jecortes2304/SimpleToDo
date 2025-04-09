@@ -34,37 +34,29 @@ type Project struct {
 	gorm.Model
 	Name        string `gorm:"unique;not null"`
 	Description string
+	UserId      uint
 	Tasks       Tasks `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:ProjectId"`
 }
 type Tasks []Task
 
-type Address struct {
-	gorm.Model
-	Address    string `gorm:"not null"`
-	City       string
-	PostalCode string
-	Country    string
-}
-
 type User struct {
-	gorm.Model
-	FirstName string
-	LastName  string
-	Age       int
-	Gender    string
-	Email     string
-	Phone     string
-	Username  string
-	Password  string    `gorm:"not null"`
-	BirthDate time.Time `gorm:"type:date"`
-	Image     []byte    `gorm:"type:bytea"`
-	AddressId uint
-	RoleId    uint
-	Address   Address `gorm:"foreignKey:AddressId"`
-	Role      Role    `gorm:"foreignKey:RoleId"`
+	gorm.Model `json:"gorm.Model"`
+	FirstName  string    `json:"firstName,omitempty"`
+	LastName   string    `json:"lastName,omitempty"`
+	Age        int       `json:"age,omitempty"`
+	Gender     string    `json:"gender,omitempty"`
+	Email      string    `json:"email,omitempty"`
+	Phone      string    `json:"phone,omitempty"`
+	Username   string    `json:"username,omitempty" gorm:"uniqueIndex:idx_username_email;not null"`
+	Password   string    `gorm:"not null" json:"password,omitempty"`
+	BirthDate  time.Time `gorm:"type:date" json:"birthDate"`
+	Image      []byte    `gorm:"type:bytea" json:"image,omitempty"`
+	RoleId     uint      `json:"roleId,omitempty"`
+	Address    string    `json:"address,omitempty"`
+	Role       Role      `gorm:"foreignKey:RoleId" json:"role"`
 }
 
-func (u *User) BeforeCreate(tx *gorm.DB) (err error) {
+func (u *User) BeforeCreate() (err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

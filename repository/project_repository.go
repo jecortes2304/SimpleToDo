@@ -15,10 +15,11 @@ func NewProjectRepository(db *gorm.DB) *ProjectRepository {
 	return &ProjectRepository{Db: db}
 }
 
-func (p *ProjectRepository) Save(project models.Project) (models.Project, error) {
+func (p *ProjectRepository) Save(project models.Project, userId int) (models.Project, error) {
 	if p.Db == nil {
 		return models.Project{}, errors.New("database connection is nil")
 	}
+	project.UserId = uint(userId)
 	result := p.Db.Save(&project)
 	if result.Error != nil {
 		return models.Project{}, result.Error
@@ -73,6 +74,20 @@ func (p *ProjectRepository) FindById(id int) (models.Project, error) {
 		return models.Project{}, errors.New("project not found")
 	}
 	return project, nil
+}
+
+func (p *ProjectRepository) FindAllByUserId(pagination response.Pagination, userId int) (*response.Pagination, error) {
+	if p.Db == nil {
+		return nil, errors.New("database connection is nil")
+	}
+	var projects []*models.Project
+	result := p.Db.Scopes(Paginate(&models.Project{}, &pagination, p.Db)).Preload("Tasks").Where("user_id = ?", userId).Find(&projects)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	pagination.Items = projects
+
+	return &pagination, nil
 }
 
 func (p *ProjectRepository) FindAll(pagination response.Pagination) (*response.Pagination, error) {

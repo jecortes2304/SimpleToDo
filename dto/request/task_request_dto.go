@@ -15,5 +15,5 @@ type CreateTaskRequestDto struct {
 type UpdateTaskRequestDto struct {
 	Title       string `json:"title" validate:"required,min=5,max=100"`
 	Description string `json:"description" validate:"required,min=10,max=300"`
-	Status      string `json:"status" validate:"required,oneof=PENDING ONGOING COMPLETED BLOCKED CANCELLED"`
+	Status      string `json:"status" validate:"required,oneof=pending ongoing completed blocked cancelled"`
 }

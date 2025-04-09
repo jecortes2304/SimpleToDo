@@ -21,6 +21,26 @@ func NewProjectService(projectRepo *repository.ProjectRepository, projectMapper 
 	}
 }
 
+func (projectService *ProjectService) GetAllByUserId(pagination response.Pagination, userId int) (*response.Pagination, error) {
+	projectsPaginated, err := projectService.ProjectRepository.FindAllByUserId(pagination, userId)
+	if err != nil {
+		return nil, err
+	}
+	projects, ok := projectsPaginated.Items.([]*models.Project)
+	if !ok {
+		return nil, errors.New("error converting projects to project entity")
+	}
+
+	var projectsResponse = make([]response.ProjectResponseDto, 0)
+	for _, project := range projects {
+		projectDto := projectService.ProjectMapper.ToDto(project)
+		projectsResponse = append(projectsResponse, projectDto)
+	}
+
+	projectsPaginated.Items = projectsResponse
+	return projectsPaginated, nil
+}
+
 func (projectService *ProjectService) GetAll(pagination response.Pagination) (*response.Pagination, error) {
 	projectsPaginated, err := projectService.ProjectRepository.FindAll(pagination)
 	if err != nil {
@@ -49,13 +69,13 @@ func (projectService *ProjectService) GetProjectById(id int) (response.ProjectRe
 	return projectService.ProjectMapper.ToDto(&project), nil
 }
 
-func (projectService *ProjectService) SaveProject(projectToCreate *request.CreateProjectRequestDto) (response.ProjectResponseDto, error) {
+func (projectService *ProjectService) SaveProject(projectToCreate *request.CreateProjectRequestDto, userId int) (response.ProjectResponseDto, error) {
 	projectEntity := models.Project{
 		Name:        projectToCreate.Name,
 		Description: projectToCreate.Description,
 	}
 
-	projectResponse, err := projectService.ProjectRepository.Save(projectEntity)
+	projectResponse, err := projectService.ProjectRepository.Save(projectEntity, userId)
 	if err != nil {
 		return response.ProjectResponseDto{}, err
 	}

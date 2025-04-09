@@ -9,12 +9,7 @@ INSERT INTO statuses (id, name, value) VALUES (5, 'CANCELLED', 'cancelled') ON C
 INSERT INTO roles (id, name, value) VALUES (1, 'Admin', 'admin') ON CONFLICT (id) DO NOTHING;
 INSERT INTO roles (id, name, value) VALUES (2, 'USER', 'user') ON CONFLICT (id) DO NOTHING;
 
--- Insert address by default
-INSERT INTO addresses (id, address, postal_code, city, country, created_at, updated_at)
-VALUES (1, 'First Av', '12345', 'Madrid', 'Spain', current_timestamp, current_timestamp)
-ON CONFLICT (id) DO NOTHING;
-
 -- Insert projects by default
-INSERT INTO projects (name, description, created_at, updated_at)
-VALUES ('Default Project', 'Dummy project by default', current_timestamp, current_timestamp)
+INSERT INTO projects (name, description, user_id, created_at, updated_at)
+VALUES ('Default Project', 'Dummy project by default', 1,current_timestamp, current_timestamp)
 ON CONFLICT (name) DO NOTHING;

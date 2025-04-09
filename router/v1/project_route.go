@@ -3,6 +3,7 @@ package v1
 import (
 	"SimpleToDo/dto/request"
 	"SimpleToDo/dto/response"
+	"SimpleToDo/middleware"
 	"SimpleToDo/repository"
 	"SimpleToDo/service"
 	"SimpleToDo/util/mapper"
@@ -18,6 +19,25 @@ type ProjectController struct {
 
 func NewProjectController(projectService *service.ProjectService) *ProjectController {
 	return &ProjectController{ProjectService: projectService}
+}
+
+func (p *ProjectController) getAllProjectsByUser(c echo.Context) error {
+	userId := c.Get("user_id").(float64)
+
+	userIdInt, err := strconv.Atoi(strconv.FormatFloat(userId, 'f', 0, 64))
+	if err != nil || userIdInt < 1 {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid User ID", true)
+	}
+
+	pagination, err := validatePagination(c)
+	if err != nil {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Bad request error", err.Error(), true)
+	}
+	projects, err := p.ProjectService.GetAllByUserId(pagination, userIdInt)
+	if err != nil {
+		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
+	}
+	return response.WriteJSONResponse(c, http.StatusOK, "Projects fetched successfully", projects, false)
 }
 
 func (p *ProjectController) getAllProjects(c echo.Context) error {
@@ -59,12 +79,18 @@ func (p *ProjectController) deleteProject(c echo.Context) error {
 }
 
 func (p *ProjectController) saveProject(c echo.Context) error {
+	userId := c.Get("user_id").(float64)
+
+	userIdInt, err := strconv.Atoi(strconv.FormatFloat(userId, 'f', 0, 64))
+	if err != nil || userIdInt < 1 {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid User ID", true)
+	}
 	project := new(request.CreateProjectRequestDto)
 	if err := c.Bind(project); err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", err.Error(), true)
 	}
 
-	projectResponse, err := p.ProjectService.SaveProject(project)
+	projectResponse, err := p.ProjectService.SaveProject(project, userIdInt)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
 	}
@@ -92,14 +118,17 @@ func (p *ProjectController) updateProject(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "Project updated successfully", projectResponse, false)
 }
 
-func ProjectRoutes(c *echo.Echo, db *gorm.DB) {
+func ProjectRoutes(db *gorm.DB, apiV1 *echo.Group) {
 	projectRepository := repository.NewProjectRepository(db)
 	projectMapper := mapper.NewProjectMapperImpl()
 
 	projectService := service.NewProjectService(projectRepository, projectMapper)
 	projectController := NewProjectController(projectService)
 
-	projectGroup := c.Group("/projects")
+	projectGroup := apiV1.Group("/projects")
+	projectGroup.Use(middleware.JWTMiddleware)
+
+	projectGroup.GET("/user", projectController.getAllProjectsByUser)
 	projectGroup.GET("", projectController.getAllProjects)
 	projectGroup.GET("/project/:id", projectController.getProjectById)
 	projectGroup.DELETE("/project/:id", projectController.deleteProject)

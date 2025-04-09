@@ -38,3 +38,16 @@ func (s *StatusRepository) FindByName(name string) (status *models.Status, err e
 
 	return &statusToReturn, nil
 }
+
+func (s *StatusRepository) FindByValue(value string) (status *models.Status, err error) {
+	if s.Db == nil {
+		return status, errors.New("database connection is nil")
+	}
+	var statusToReturn models.Status
+	result := s.Db.Find(&statusToReturn, "value = ?", value)
+	if result.Error != nil {
+		return nil, errors.New("status not found")
+	}
+
+	return &statusToReturn, nil
+}

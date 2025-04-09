@@ -7,6 +7,10 @@ import (
 )
 
 func InitRouters(e *echo.Echo, db *gorm.DB) {
-	v1.TaskRouters(e, db)
-	v1.ProjectRoutes(e, db)
+	apiV1 := e.Group("/api/v1")
+
+	v1.AuthRouters(db, apiV1)
+	v1.UserRouters(db, apiV1)
+	v1.TaskRouters(db, apiV1)
+	v1.ProjectRoutes(db, apiV1)
 }

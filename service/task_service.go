@@ -116,7 +116,7 @@ func (taskService *TaskService) SaveTask(taskToCreate *request.CreateTaskRequest
 
 func (taskService *TaskService) UpdateTask(taskUpdate *request.UpdateTaskRequestDto, id int) (response.TaskResponseDto, error) {
 
-	statusFetched, err := taskService.StatusRepository.FindByName(taskUpdate.Status)
+	statusFetched, err := taskService.StatusRepository.FindByValue(taskUpdate.Status)
 	if err != nil {
 		return response.TaskResponseDto{}, err
 	}
@@ -136,8 +136,8 @@ func (taskService *TaskService) UpdateTask(taskUpdate *request.UpdateTaskRequest
 	return taskService.TaskMapper.ToDto(&taskResponse), nil
 }
 
-func (taskService *TaskService) DeleteTask(taskId int) error {
-	err := taskService.TaskRepository.Delete(taskId)
+func (taskService *TaskService) DeleteTasks(taskIds []int) error {
+	err := taskService.TaskRepository.Delete(taskIds)
 	if err != nil {
 		return err
 	}

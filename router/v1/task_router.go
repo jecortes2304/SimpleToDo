@@ -3,11 +3,13 @@ package v1
 import (
 	"SimpleToDo/dto/request"
 	"SimpleToDo/dto/response"
+	"SimpleToDo/middleware"
 	"SimpleToDo/models"
 	"SimpleToDo/repository"
 	"SimpleToDo/service"
 	"SimpleToDo/util/mapper"
 	"errors"
+	"fmt"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
@@ -156,29 +158,30 @@ func (taskController *TaskController) updateTask(c echo.Context) error {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Error updating task", err.Error(), true)
 	}
 
-	return response.WriteJSONResponse(c, http.StatusCreated, "Task updated successfully", taskUpdated, false)
+	return response.WriteJSONResponse(c, http.StatusOK, "Task updated successfully", taskUpdated, false)
 }
 
-func (taskController *TaskController) deleteTask(c echo.Context) error {
-	taskId := c.Param("id")
-	if taskId == "" {
-		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Task ID must be provided", true)
+func (taskController *TaskController) deleteTasks(c echo.Context) error {
+	rawIDs := c.QueryParam("ids")
+	if rawIDs == "" {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "IDs must be provided", true)
 	}
 
-	taskIdInt, err := strconv.Atoi(taskId)
-	if err != nil || taskIdInt < 1 {
-		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid Task ID", true)
-	}
-
-	errDeleted := taskController.TaskService.DeleteTask(taskIdInt)
-	if errDeleted != nil {
-		if strings.Contains(errDeleted.Error(), "not found") {
-			return response.WriteJSONResponse(c, http.StatusNotFound, "Error deleting task", errDeleted.Error(), true)
+	idStrs := strings.Split(rawIDs, ",")
+	var ids []int
+	for _, idStr := range idStrs {
+		id, err := strconv.Atoi(strings.TrimSpace(idStr))
+		if err != nil {
+			return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid ID", fmt.Sprintf("'%s' is not a valid ID", idStr), true)
 		}
-		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Error deleting task", errDeleted.Error(), true)
+		ids = append(ids, id)
 	}
 
-	return response.WriteJSONResponse(c, http.StatusOK, "Task deleted successfully", "OK", false)
+	if err := taskController.TaskService.DeleteTasks(ids); err != nil {
+		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Failed to delete tasks", err.Error(), true)
+	}
+
+	return response.WriteJSONResponse(c, http.StatusOK, "Tasks deleted", "OK", false)
 }
 
 func validatePagination(c echo.Context) (response.Pagination, error) {
@@ -223,7 +226,7 @@ func validatePagination(c echo.Context) (response.Pagination, error) {
 	return pagination, nil
 }
 
-func TaskRouters(c *echo.Echo, db *gorm.DB) {
+func TaskRouters(db *gorm.DB, v1 *echo.Group) {
 	taskRepository := repository.NewTaskRepository(db)
 	statusRepository := repository.NewStatusRepository(db)
 	taskMapper := mapper.NewTaskMapperImpl()
@@ -231,11 +234,13 @@ func TaskRouters(c *echo.Echo, db *gorm.DB) {
 	taskService := service.NewTaskService(taskRepository, statusRepository, taskMapper)
 	taskController := NewTaskController(taskService)
 
-	tasksGroup := c.Group("/tasks")
+	tasksGroup := v1.Group("/tasks")
+	tasksGroup.Use(middleware.JWTMiddleware)
+
 	tasksGroup.GET("", taskController.getAll)
 	tasksGroup.GET("/:projectId", taskController.getAllTaskByProject)
 	tasksGroup.GET("/task/:id", taskController.getTaskById)
-	tasksGroup.DELETE("/task/:id", taskController.deleteTask)
+	tasksGroup.DELETE("", taskController.deleteTasks)
 	tasksGroup.POST("/task/:projectId", taskController.saveTask)
 	tasksGroup.PUT("/task/:id", taskController.updateTask)
 }

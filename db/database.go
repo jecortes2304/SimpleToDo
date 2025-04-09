@@ -3,7 +3,7 @@ package db
 import (
 	"SimpleToDo/models"
 	"fmt"
-	"gorm.io/driver/sqlite"
+	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
 	"log"
 	"os"
@@ -47,7 +47,6 @@ func InitDB() (error, *gorm.DB) {
 		&models.Task{},
 		&models.Project{},
 		&models.User{},
-		&models.Address{},
 	)
 
 	Seed(DB)

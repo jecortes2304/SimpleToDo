@@ -1,36 +1,34 @@
 package db
 
 import (
+	"SimpleToDo"
 	"SimpleToDo/models"
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 	"log"
-	"os"
 	"strings"
 	"time"
 )
 
-func ReadImageFile(filePath string) ([]byte, error) {
-	imageData, err := os.ReadFile(filePath)
-	if err != nil {
-		return nil, err
-	}
-	return imageData, nil
-}
-
 func Seed(db *gorm.DB) {
-	filePath := "db/data.sql"
-	sqlBytes, err := os.ReadFile(filePath)
+	sqlBytes, err := embedfs.SQLFS.ReadFile("db/data.sql")
 	if err != nil {
-		log.Fatalf("Error al leer el archivo SQL: %v", err)
-	}
-
-	imageBytes, err := ReadImageFile("config/root_image.png")
-	if err != nil {
-		log.Fatalf("Error al leer la imagen: %v", err)
+		log.Fatalf("Error al leer el archivo SQL embebido: %v", err)
 	}
 
 	sqlStatements := strings.Split(string(sqlBytes), ";")
+	for _, stmt := range sqlStatements {
+		stmt = strings.TrimSpace(stmt)
+		if stmt != "" {
+			if err := db.Exec(stmt).Error; err != nil {
+				log.Fatalf("Error al ejecutar SQL: %v", err)
+			}
+		}
+	}
+
+	imageBytes, err := embedfs.ImageFS.ReadFile("config/root_image.png")
+	if err != nil {
+		log.Fatalf("Error al leer la imagen embebida: %v", err)
+	}
 
 	for _, stmt := range sqlStatements {
 		stmt = strings.TrimSpace(stmt)
@@ -41,8 +39,6 @@ func Seed(db *gorm.DB) {
 		}
 	}
 
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("rootpassword"), bcrypt.DefaultCost)
-
 	user := models.User{
 		FirstName: "Root",
 		LastName:  "Admin",
@@ -52,9 +48,9 @@ func Seed(db *gorm.DB) {
 		Phone:     "123456789",
 		Username:  "root",
 		Image:     imageBytes,
-		Password:  string(hashedPassword),
+		Password:  "rootpassword",
 		BirthDate: time.Now(),
-		AddressId: 1,
+		Address:   "First Avenue 5, Madrid, Spain",
 		RoleId:    1,
 	}
 	if err := db.FirstOrCreate(&user, models.User{Username: "root"}).Error; err != nil {

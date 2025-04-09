@@ -51,21 +51,24 @@ func (t *TaskRepository) Update(taskToUpdate models.Task, id int) (models.Task, 
 	return updatedTask, nil
 }
 
-func (t *TaskRepository) Delete(id int) error {
+func (t *TaskRepository) Delete(ids []int) error {
 	if t.Db == nil {
 		return errors.New("database connection is nil")
 	}
 
-	var taskToDelete models.Task
-
-	result := t.Db.First(&taskToDelete, id)
-	if result.Error != nil {
-		return errors.New("task not found")
+	var count int64
+	t.Db.Model(&models.Task{}).Where("id IN ?", ids).Count(&count)
+	if count == 0 {
+		return errors.New("no tasks found to delete")
 	}
 
-	result = t.Db.Delete(&taskToDelete, id)
+	result := t.Db.Where("id IN ?", ids).Delete(&models.Task{})
 	if result.Error != nil {
 		return result.Error
+	}
+
+	if result.RowsAffected == 0 {
+		return errors.New("no tasks were deleted")
 	}
 
 	return nil
