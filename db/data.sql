@@ -10,6 +10,6 @@ INSERT INTO roles (id, name, value) VALUES (1, 'Admin', 'admin') ON CONFLICT (id
 INSERT INTO roles (id, name, value) VALUES (2, 'USER', 'user') ON CONFLICT (id) DO NOTHING;
 
 -- Insert projects by default
-INSERT INTO projects (name, description, user_id, created_at, updated_at)
-VALUES ('Default Project', 'Dummy project by default', 1,current_timestamp, current_timestamp)
-ON CONFLICT (name) DO NOTHING;
+INSERT INTO projects (id, name, description, user_id, created_at, updated_at)
+VALUES (1, 'Default Project', 'Dummy project by default', 1,current_timestamp, current_timestamp)
+ON CONFLICT (id) DO NOTHING;

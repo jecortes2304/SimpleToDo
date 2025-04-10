@@ -110,7 +110,7 @@ func (p *ProjectController) updateProject(c echo.Context) error {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", err.Error(), true)
 	}
 
-	projectResponse, err := p.ProjectService.UpdateProject(project, 1)
+	projectResponse, err := p.ProjectService.UpdateProject(project, projectIdInt)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
 	}

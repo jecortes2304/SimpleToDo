@@ -31,12 +31,16 @@ type Task struct {
 }
 
 type Project struct {
-	gorm.Model
-	Name        string `gorm:"unique;not null"`
+	ID          uint `gorm:"primaryKey"`
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Name        string `gorm:"not null"`
 	Description string
 	UserId      uint
+	User        User  `gorm:"foreignKey:UserId"`
 	Tasks       Tasks `gorm:"constraint:OnUpdate:CASCADE,OnDelete:SET NULL;foreignKey:ProjectId"`
 }
+
 type Tasks []Task
 
 type User struct {
@@ -56,7 +60,7 @@ type User struct {
 	Role       Role      `gorm:"foreignKey:RoleId" json:"role"`
 }
 
-func (u *User) BeforeCreate() (err error) {
+func (u *User) BeforeCreate(*gorm.DB) (err error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(u.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return err

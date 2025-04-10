@@ -20,7 +20,14 @@ func (p *ProjectRepository) Save(project models.Project, userId int) (models.Pro
 		return models.Project{}, errors.New("database connection is nil")
 	}
 	project.UserId = uint(userId)
-	result := p.Db.Save(&project)
+	var projectFound models.Project
+	result := p.Db.Where("name = ? AND user_id = ?", project.Name, userId).First(&projectFound)
+
+	if result.Error == nil {
+		return models.Project{}, errors.New("project already exists with that name")
+	}
+
+	result = p.Db.Save(&project)
 	if result.Error != nil {
 		return models.Project{}, result.Error
 	}

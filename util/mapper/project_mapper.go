@@ -3,7 +3,6 @@ package mapper
 import (
 	"SimpleToDo/dto/response"
 	"SimpleToDo/models"
-	"gorm.io/gorm"
 )
 
 type ProjectMapperImpl struct {
@@ -48,7 +47,6 @@ func (p *ProjectMapperImpl) ToDto(projectEntity *models.Project) response.Projec
 
 func (p *ProjectMapperImpl) ToEntity(projectDto response.ProjectResponseDto) *models.Project {
 	return &models.Project{
-		Model:       gorm.Model{},
 		Name:        projectDto.Name,
 		Description: projectDto.Description,
 		Tasks:       []models.Task{},
