@@ -21,15 +21,15 @@ jobs:
 
       - name: Build for Linux
         run: |
-          GOOS=linux GOARCH=amd64 go build -o build/simpletodo-linux ./cmd
+          GOOS=linux GOARCH=amd64 go build -o build/simpletodo-linux ./app
 
       - name: Build for Windows
         run: |
-          GOOS=windows GOARCH=amd64 go build -o build/simpletodo-windows.exe ./cmd
+          GOOS=windows GOARCH=amd64 go build -o build/simpletodo-windows.exe ./app
 
       - name: Build for macOS
         run: |
-          GOOS=darwin GOARCH=amd64 go build -o build/simpletodo-macos ./cmd
+          GOOS=darwin GOARCH=amd64 go build -o build/simpletodo-macos ./app
 
       - name: Upload Release Assets
         uses: softprops/action-gh-release@v1

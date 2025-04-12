@@ -71,24 +71,6 @@ func openBrowser(url string) {
 	}
 }
 
-//var apiBaseURL string
-//
-//func indexHandler(c echo.Context) error {
-//	f, err := embedfs.DistDirFS.Open("frontend/index.html")
-//	if err != nil {
-//		return err
-//	}
-//	defer f.Close()
-//
-//	data, err := io.ReadAll(f)
-//	if err != nil {
-//		return err
-//	}
-//
-//	html := strings.ReplaceAll(string(data), "__API_BASE_URL__", apiBaseURL)
-//	return c.HTML(http.StatusOK, html)
-//}
-
 func main() {
 	port := flag.Int("port", 8080, "Port to run the server on")
 	openBrowserVal := flag.Bool("openbrowser", false, "Open browser on start")
@@ -102,7 +84,6 @@ func main() {
 
 	e.FileFS("/", "index.html", embedfs.DistIndexHTML)
 	e.StaticFS("/", embedfs.DistDirFS)
-	//e.GET("/", indexHandler)
 
 	e.HideBanner = true
 	util.PrintBanner()
