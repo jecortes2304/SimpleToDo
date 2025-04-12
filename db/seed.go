@@ -43,7 +43,7 @@ func Seed(db *gorm.DB) {
 		FirstName: "Root",
 		LastName:  "Admin",
 		Age:       30,
-		Gender:    "Unknown",
+		Gender:    "male",
 		Email:     "root@example.com",
 		Phone:     "123456789",
 		Username:  "root",

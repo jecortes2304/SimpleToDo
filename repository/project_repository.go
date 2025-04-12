@@ -88,10 +88,19 @@ func (p *ProjectRepository) FindAllByUserId(pagination response.Pagination, user
 		return nil, errors.New("database connection is nil")
 	}
 	var projects []*models.Project
-	result := p.Db.Scopes(Paginate(&models.Project{}, &pagination, p.Db)).Preload("Tasks").Where("user_id = ?", userId).Find(&projects)
+
+	condition1 := response.NewCondition("user_id", response.Equal, userId, response.Empty)
+	conditions := []response.Condition{*condition1}
+
+	result := p.Db.Where(condition1.ToQueryStringWithValue()).
+		Scopes(PaginateWithConditions(&models.Project{}, conditions, &pagination, p.Db)).
+		Preload("Tasks").
+		Find(&projects)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}
+
 	pagination.Items = projects
 
 	return &pagination, nil

@@ -86,12 +86,12 @@ func (t *TaskRepository) FindById(id int) (task models.Task, err error) {
 	return taskToReturn, nil
 }
 
-func (t *TaskRepository) FindAll(pagination response.Pagination) (*response.Pagination, error) {
+func (t *TaskRepository) FindAll(pagination response.Pagination, userId int) (*response.Pagination, error) {
 	if t.Db == nil {
 		return nil, errors.New("database connection is nil")
 	}
 	var tasks []*models.Task
-	result := t.Db.Scopes(Paginate(&models.Task{}, &pagination, t.Db)).Preload("Status").Find(&tasks)
+	result := t.Db.Where("user_id = ?", userId).Scopes(Paginate(&models.Task{}, &pagination, t.Db)).Preload("Status").Find(&tasks)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -100,15 +100,23 @@ func (t *TaskRepository) FindAll(pagination response.Pagination) (*response.Pagi
 	return &pagination, nil
 }
 
-func (t *TaskRepository) FindAllByProjectId(pagination response.Pagination, projectId int) (*response.Pagination, error) {
+func (t *TaskRepository) FindAllByProjectId(pagination response.Pagination, projectId int, userId int) (*response.Pagination, error) {
 	if t.Db == nil {
 		return nil, errors.New("database connection is nil")
 	}
 	var tasks []*models.Task
-	result := t.Db.Scopes(Paginate(&models.Task{}, &pagination, t.Db)).
+
+	condition1 := response.NewCondition("user_id", response.Equal, userId, response.And)
+	condition2 := response.NewCondition("project_id", response.Equal, projectId, response.Empty)
+	conditions := []response.Condition{*condition1, *condition2}
+
+	queryStr, args := response.ToQueryStringMany(conditions)
+
+	result := t.Db.Where(queryStr, args...).
+		Scopes(PaginateWithConditions(&models.Task{}, conditions, &pagination, t.Db)).
 		Preload("Status").
-		Where("project_id = ?", projectId).
 		Find(&tasks)
+
 	if result.Error != nil {
 		return nil, result.Error
 	}

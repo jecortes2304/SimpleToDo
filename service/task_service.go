@@ -25,9 +25,9 @@ func NewTaskService(taskRepo *repository.TaskRepository, statusRepo *repository.
 	}
 }
 
-func (taskService *TaskService) GetAll(pagination response.Pagination) (*response.Pagination, error) {
+func (taskService *TaskService) GetAll(pagination response.Pagination, userId int) (*response.Pagination, error) {
 
-	tasksResponsePaginated, err := taskService.TaskRepository.FindAll(pagination)
+	tasksResponsePaginated, err := taskService.TaskRepository.FindAll(pagination, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -51,9 +51,9 @@ func (taskService *TaskService) GetAll(pagination response.Pagination) (*respons
 	return tasksResponsePaginated, nil
 }
 
-func (taskService *TaskService) GetAllTaskByProjectId(pagination response.Pagination, projectId int) (*response.Pagination, error) {
+func (taskService *TaskService) GetAllTaskByProjectId(pagination response.Pagination, projectId int, userId int) (*response.Pagination, error) {
 
-	tasksResponsePaginated, err := taskService.TaskRepository.FindAllByProjectId(pagination, projectId)
+	tasksResponsePaginated, err := taskService.TaskRepository.FindAllByProjectId(pagination, projectId, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func (taskService *TaskService) GetTaskById(taskId int) (response.TaskResponseDt
 	return taskDto, nil
 }
 
-func (taskService *TaskService) SaveTask(taskToCreate *request.CreateTaskRequestDto, projectId int) (response.TaskResponseDto, error) {
+func (taskService *TaskService) SaveTask(taskToCreate *request.CreateTaskRequestDto, projectId int, userId int) (response.TaskResponseDto, error) {
 
 	statusFetched, err := taskService.StatusRepository.FindById(1)
 	if err != nil {
@@ -100,7 +100,7 @@ func (taskService *TaskService) SaveTask(taskToCreate *request.CreateTaskRequest
 		Description: taskToCreate.Description,
 		StatusId:    1,
 		Status:      statusFetched,
-		UserId:      1,
+		UserId:      uint(userId),
 		ProjectId:   uint(projectId),
 		User:        models.User{},
 		Project:     models.Project{},

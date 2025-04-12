@@ -5,10 +5,15 @@ import (
 	"SimpleToDo/db"
 	"SimpleToDo/router"
 	"SimpleToDo/util"
+	"flag"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"net/http"
+	"os/exec"
+	"runtime"
+	"strings"
+	"time"
 )
 
 func applyMiddlewares(e *echo.Echo) {
@@ -44,11 +49,60 @@ func applyMiddlewares(e *echo.Echo) {
 	}))
 }
 
+func openBrowser(url string) {
+	var err error
+
+	switch runtime.GOOS {
+	case "linux", "freebsd", "openbsd", "netbsd":
+		err = exec.Command("xdg-open", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	case "windows":
+		r := strings.NewReplacer("&", "^&")
+		err = exec.Command("cmd", "/c", "start", r.Replace(url)).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+
+	if err != nil {
+		fmt.Println("❌ Error opening browser:", err)
+	} else {
+		fmt.Println("🌐 Browser launched:", url)
+	}
+}
+
+//var apiBaseURL string
+//
+//func indexHandler(c echo.Context) error {
+//	f, err := embedfs.DistDirFS.Open("frontend/index.html")
+//	if err != nil {
+//		return err
+//	}
+//	defer f.Close()
+//
+//	data, err := io.ReadAll(f)
+//	if err != nil {
+//		return err
+//	}
+//
+//	html := strings.ReplaceAll(string(data), "__API_BASE_URL__", apiBaseURL)
+//	return c.HTML(http.StatusOK, html)
+//}
+
 func main() {
+	port := flag.Int("port", 8080, "Port to run the server on")
+	openBrowserVal := flag.Bool("openbrowser", false, "Open browser on start")
+
+	flag.Parse()
+
+	fmt.Println("Port:", *port)
+	fmt.Println("Open browser:", *openBrowserVal)
+
 	e := echo.New()
 
 	e.FileFS("/", "index.html", embedfs.DistIndexHTML)
 	e.StaticFS("/", embedfs.DistDirFS)
+	//e.GET("/", indexHandler)
 
 	e.HideBanner = true
 	util.PrintBanner()
@@ -61,5 +115,12 @@ func main() {
 	}
 	router.InitRouters(e, DB)
 
-	e.Logger.Fatal(e.Start(":8080"), "Error starting server")
+	if *openBrowserVal {
+		go func() {
+			time.Sleep(1 * time.Second)
+			openBrowser(fmt.Sprintf("http://127.0.0.1:%d", *port))
+		}()
+	}
+
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", *port)))
 }

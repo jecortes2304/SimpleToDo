@@ -41,6 +41,7 @@ func (p *ProjectController) getAllProjectsByUser(c echo.Context) error {
 }
 
 func (p *ProjectController) getAllProjects(c echo.Context) error {
+
 	pagination, err := validatePagination(c)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Bad request error", err.Error(), true)

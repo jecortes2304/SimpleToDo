@@ -27,11 +27,19 @@ func NewTaskController(taskService *service.TaskService) *TaskController {
 }
 
 func (taskController *TaskController) getAll(c echo.Context) error {
+
+	userId := c.Get("user_id").(float64)
+
+	userIdInt, err := strconv.Atoi(strconv.FormatFloat(userId, 'f', 0, 64))
+	if err != nil || userIdInt < 1 {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid User ID", true)
+	}
+
 	pagination, err := validatePagination(c)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Bad request error", err.Error(), true)
 	}
-	tasks, err := taskController.TaskService.GetAll(pagination)
+	tasks, err := taskController.TaskService.GetAll(pagination, userIdInt)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
 	}
@@ -40,6 +48,13 @@ func (taskController *TaskController) getAll(c echo.Context) error {
 }
 
 func (taskController *TaskController) getAllTaskByProject(c echo.Context) error {
+	userId := c.Get("user_id").(float64)
+
+	userIdInt, err := strconv.Atoi(strconv.FormatFloat(userId, 'f', 0, 64))
+	if err != nil || userIdInt < 1 {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid User ID", true)
+	}
+
 	pagination, err := validatePagination(c)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Bad request error", err.Error(), true)
@@ -54,7 +69,7 @@ func (taskController *TaskController) getAllTaskByProject(c echo.Context) error 
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid project ID", true)
 	}
 
-	tasks, err := taskController.TaskService.GetAllTaskByProjectId(pagination, projectIdInt)
+	tasks, err := taskController.TaskService.GetAllTaskByProjectId(pagination, projectIdInt, userIdInt)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
 	}
@@ -85,6 +100,12 @@ func (taskController *TaskController) getTaskById(c echo.Context) error {
 }
 
 func (taskController *TaskController) saveTask(c echo.Context) error {
+	userId := c.Get("user_id").(float64)
+
+	userIdInt, err := strconv.Atoi(strconv.FormatFloat(userId, 'f', 0, 64))
+	if err != nil || userIdInt < 1 {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid User ID", true)
+	}
 
 	projectId := c.Param("projectId")
 	if projectId == "" {
@@ -112,7 +133,7 @@ func (taskController *TaskController) saveTask(c echo.Context) error {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", errorsString, true)
 	}
 
-	taskResponse, err := taskController.TaskService.SaveTask(task, projectIdInt)
+	taskResponse, err := taskController.TaskService.SaveTask(task, projectIdInt, userIdInt)
 	if err != nil {
 		if strings.Contains(err.Error(), "not found") {
 			return response.WriteJSONResponse(c, http.StatusNotFound, "Error saving task", err.Error(), true)
