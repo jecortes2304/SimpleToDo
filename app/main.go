@@ -5,10 +5,11 @@ import (
 	"SimpleToDo/db"
 	"SimpleToDo/router"
 	"SimpleToDo/util"
-	"flag"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/labstack/gommon/log"
+	"github.com/spf13/pflag"
 	"net/http"
 	"os/exec"
 	"runtime"
@@ -16,14 +17,20 @@ import (
 	"time"
 )
 
-func applyMiddlewares(e *echo.Echo) {
+func applyMiddlewares(e *echo.Echo, showLogs *bool) {
+
+	if !*showLogs {
+		e.Logger.SetLevel(log.OFF)
+	} else {
+		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
+			Format: "\033[36m[${time_rfc3339}]\033[0m \033[32m${method}\033[0m \033[34m${uri}\033[0m \033[33m${status}\033[0m ${latency_human}\n",
+		}))
+	}
+
 	e.Use(middleware.Recover())
-	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "\033[36m[${time_rfc3339}]\033[0m \033[32m${method}\033[0m \033[34m${uri}\033[0m \033[33m${status}\033[0m ${latency_human}\n",
-	}))
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{
-			"http://localhost:*",
+			"http://localhost:*", "http://127.0.0.1:*",
 		},
 		AllowMethods: []string{
 			echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS,
@@ -33,6 +40,7 @@ func applyMiddlewares(e *echo.Echo) {
 		},
 		AllowCredentials: true,
 	}))
+
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: func(c echo.Context) bool {
 			// Skip the proxy if the prefix is /api
@@ -72,13 +80,15 @@ func openBrowser(url string) {
 }
 
 func main() {
-	port := flag.Int("port", 8080, "Port to run the server on")
-	openBrowserVal := flag.Bool("openbrowser", false, "Open browser on start")
+	port := pflag.Int("port", 8000, "Port to run the server on")
+	openBrowserVal := pflag.Bool("openbrowser", true, "Open browser on start")
+	showLogs := pflag.Bool("showlogs", true, "Show logs in console")
 
-	flag.Parse()
+	pflag.Parse()
 
 	fmt.Println("Port:", *port)
 	fmt.Println("Open browser:", *openBrowserVal)
+	fmt.Println("Show logs:", *showLogs)
 
 	e := echo.New()
 
@@ -87,7 +97,7 @@ func main() {
 
 	e.HideBanner = true
 	util.PrintBanner()
-	applyMiddlewares(e)
+	applyMiddlewares(e, showLogs)
 
 	errDb, DB := db.InitDB()
 	if errDb != nil {
