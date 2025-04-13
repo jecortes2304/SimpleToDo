@@ -1,3 +1,5 @@
 vendor
 .idea
 config/.env
+*.env
+frontend/node_modules

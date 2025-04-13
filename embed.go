@@ -15,12 +15,12 @@ var (
 	//go:embed db/data.sql
 	SQLFS embed.FS
 
-	//go:embed frontend/*
+	//go:embed frontend/dist/*
 	StaticFS embed.FS
 
-	//go:embed frontend/index.html
+	//go:embed frontend/dist/index.html
 	indexHTML embed.FS
 
-	DistDirFS     = echo.MustSubFS(StaticFS, "frontend")
-	DistIndexHTML = echo.MustSubFS(indexHTML, "frontend")
+	DistDirFS     = echo.MustSubFS(StaticFS, "frontend/dist")
+	DistIndexHTML = echo.MustSubFS(indexHTML, "frontend/dist")
 )
