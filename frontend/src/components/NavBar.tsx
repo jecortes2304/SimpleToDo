@@ -8,14 +8,14 @@ import {getProfile} from '../services/UserService.ts';
 import {User} from '../schemas/user.ts';
 import {useTranslation} from "react-i18next";
 import {UserCircleIcon} from "@heroicons/react/16/solid";
-import useStore from "../store/store.ts";
+import useAppStore from "../store/appStore.ts";
 
 const NavBar: React.FC = () => {
     const navigate = useNavigate();
     const {t} = useTranslation();
     const alert = useAlert();
     const [user, setUser] = useState<User | null>(null);
-    const {avatarRefresh} = useStore()
+    const {avatarRefresh} = useAppStore()
 
     const logoutCallback = async () => {
         const response = await logout();

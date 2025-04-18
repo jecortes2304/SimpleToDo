@@ -4,13 +4,13 @@ import {getProfile, updateProfile} from '../services/UserService'
 import {useAlert} from '../hooks/useAlert'
 import {UpdateUserRequestDto, User} from '../schemas/user'
 import {EnvelopeIcon, PhoneIcon, PhotoIcon, UserCircleIcon, UserIcon} from "@heroicons/react/16/solid";
-import useStore from "../store/store.ts";
+import useAppStore from "../store/appStore.ts";
 
 const ProfilePage: React.FC = () => {
     const {t} = useTranslation()
     const alert = useAlert()
     const [user, setUser] = useState<User | null>(null)
-    const {setAvatarRefresh} = useStore()
+    const {setAvatarRefresh} = useAppStore()
     const [form, setForm] = useState<UpdateUserRequestDto>({
         firstName: '',
         lastName: '',
