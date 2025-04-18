@@ -26,6 +26,7 @@
     "task": "Tarea",
     "projects": "Proyectos",
     "addTask": "Agregar tarea",
+    "editTask": "Actualizar tarea",
     "title": "Título",
     "description": "Descripción",
     "taskCreatedOk": "Tarea creada con éxito",

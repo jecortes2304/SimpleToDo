@@ -1,32 +1,33 @@
-import React, {useCallback, useEffect, useState} from "react";
+import React from "react";
+// import {useCallback, useEffect, useState} from "react";
 import NavBar from "./NavBar";
 import {useTranslation} from "react-i18next";
 import {Outlet} from "react-router-dom";
 import {AlertManager} from "./AlertManager.tsx";
 import {ClipboardIcon, FolderIcon, HomeIcon} from "@heroicons/react/24/solid";
-import {getProfile} from "../services/UserService.ts";
-import {User} from "../schemas/user.ts";
-import {useAlert} from "../hooks/useAlert.ts";
-import {UsersIcon} from "@heroicons/react/16/solid";
+// import {getProfile} from "../services/UserService.ts";
+// import {User} from "../schemas/user.ts";
+// import {useAlert} from "../hooks/useAlert.ts";
+// import {UsersIcon} from "@heroicons/react/16/solid";
 
 const DrawerNavigation: React.FC = () => {
     const { t } = useTranslation();
-    const [user, setUser] = useState<User | null>(null)
-    const alert = useAlert()
+    // const [user, setUser] = useState<User | null>(null)
+    // const alert = useAlert()
 
-    const fetchProfileCallback = useCallback(async () => {
-        const res = await getProfile()
-        if (res.ok && res.result) {
-            const data = res.result as User
-            setUser(data)
-        } else {
-            alert(t('profile.errorLoading'), 'alert-error')
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchProfileCallback().then()
-    }, [fetchProfileCallback])
+    // const fetchProfileCallback = useCallback(async () => {
+    //     const res = await getProfile()
+    //     if (res.ok && res.result) {
+    //         const data = res.result as User
+    //         // setUser(data)
+    //     } else {
+    //         alert(t('profile.errorLoading'), 'alert-error')
+    //     }
+    // }, [])
+    //
+    // useEffect(() => {
+    //     fetchProfileCallback().then()
+    // }, [fetchProfileCallback])
 
 
     return (
@@ -74,15 +75,14 @@ const DrawerNavigation: React.FC = () => {
                             {t('projects.projects')}
                         </a>
                     </li>
-
-                    {user && user?.role === "Admin" && (
-                        <li className="text-lg">
-                            <a href="/users" className="flex items-center gap-2">
-                                <UsersIcon className="h-5 w-5" />
-                                {t('users.users')}
-                            </a>
-                        </li>
-                    )}
+                    {/*{user && user?.role === "Admin" && (*/}
+                    {/*    <li className="text-lg">*/}
+                    {/*        <a href="/users" className="flex items-center gap-2">*/}
+                    {/*            <UsersIcon className="h-5 w-5" />*/}
+                    {/*            {t('users.users')}*/}
+                    {/*        </a>*/}
+                    {/*    </li>*/}
+                    {/*)}*/}
                 </ul>
             </div>
         </div>
