@@ -26,6 +26,7 @@
     "projects": "Projects",
     "task": "Task",
     "addTask": "Add Task",
+    "editTask": "Update Task",
     "title": "Title",
     "description": "Description",
     "taskCreatedOk": "Task created successfully",
