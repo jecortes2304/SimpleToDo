@@ -1,0 +1,637 @@
+{
+	"info": {
+		"_postman_id": "dbe9e247-4c3e-40b3-be5b-c535f3387e56",
+		"name": "SimpleToDo",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "19256803"
+	},
+	"item": [
+		{
+			"name": "v1",
+			"item": [
+				{
+					"name": "tasks",
+					"item": [
+						{
+							"name": "Create a task",
+							"request": {
+								"auth": {
+									"type": "bearer",
+									"bearer": {
+										"token": "eyJhbGciOiJSUzI1NiJ9.eyJyb2xlIjpbeyJhdXRob3JpdHkiOiJBRE1JTiJ9XSwic3ViIjoic210ZCIsImlhdCI6MTczNDkwMjg2MiwiZXhwIjoxNzM1MDc1NjYyfQ.lTbwGFLbKKl-67zBh8BaP9bpXm9xSwnSu2H7kzOHpu1k0kf7LWEBjT6k-8PWzpqJMxPoFMo_nW8auCYQ6BSzgKoTHU53hiwpY2c5lLYX229Da7qxftpOTMRpYI6OQUHZaV6GXT56e1-EPCqDiTYkJHx-m6RMmHEFHKBw_gWsVqXM-FBQC2Vu7o_MzcsDalYbt2bFPYOiSijQRf7T7_tcesCRrTsgLdjUoPI5hZiIABtVmSw8LkaGPZgn2iXoU-17qVBFYNM4ok-ATNi0g7w7-T71tY3WaV3eAO8EElhewuSsty2ggoCsrYmf51CLPHJWS1aXgAT-FUt7Sob5hTozmw"
+									}
+								},
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Testing 456775\",\r\n    \"description\": \"Otasdasdaraa a\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/tasks/task/:projectId",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks",
+										"task",
+										":projectId"
+									],
+									"variable": [
+										{
+											"key": "projectId",
+											"value": "101"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Delete  a tasks by id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/tasks?ids=15",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks"
+									],
+									"query": [
+										{
+											"key": "ids",
+											"value": "15"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a task by id",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/tasks/task/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks",
+										"task",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all tasks",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/tasks?limit=5&page=1&sort=asc",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "5"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "sort",
+											"value": "asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all tasks by project",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/tasks/:projectId?limit=10&page=1&sort=asc",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks",
+										":projectId"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "sort",
+											"value": "asc"
+										}
+									],
+									"variable": [
+										{
+											"key": "projectId",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update a task by id",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Completadaaa\",\r\n    \"description\": \"Prueba definitiava\",\r\n    \"status\": \"completed\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/tasks/task/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"tasks",
+										"task",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "34"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "projects",
+					"item": [
+						{
+							"name": "Create a project",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Primer project\",\r\n    \"description\": \"Probando segundo project\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/projects/project"
+							},
+							"response": []
+						},
+						{
+							"name": "Delete  a project by id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/projects/project/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"projects",
+										"project",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a project by id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/projects/project/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"projects",
+										"project",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all projects",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/projects?limit=10&page=1&sort=asc",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"projects"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "sort",
+											"value": "asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all Projects by user",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/projects/user?limit=10&page=1&sort=asc",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"projects",
+										"user"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "sort",
+											"value": "asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update project by id",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"name\": \"Otro titulo\",\r\n    \"description\": \"Otra descripcion\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/projects/project/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"projects",
+										"project",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "59"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "users",
+					"item": [
+						{
+							"name": "Delete a user by id",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/users/user/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"users",
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get a user by id",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/users/user/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"users",
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get all users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{host}}/users?limit=10&page=1&sort=asc",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"users"
+									],
+									"query": [
+										{
+											"key": "limit",
+											"value": "10"
+										},
+										{
+											"key": "page",
+											"value": "1"
+										},
+										{
+											"key": "sort",
+											"value": "asc"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update user",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n    \"title\": \"Otro titulo\",\r\n    \"description\": \"Otra descripcion\",\r\n    \"status\": \"ONGOING\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "{{host}}/users/user/:id",
+									"host": [
+										"{{host}}"
+									],
+									"path": [
+										"users",
+										"user",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "profile",
+					"item": [
+						{
+							"name": "Get profile",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": "{{host}}/profile"
+							},
+							"response": []
+						},
+						{
+							"name": "Update profile",
+							"request": {
+								"method": "PUT",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"firstName\": \"ASD\",\r\n  \"lastName\": \"Pruebalastame\",\r\n  \"email\": \"correo@correo.com\",\r\n  \"image\": [0]\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/profile"
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "auth",
+					"item": [
+						{
+							"name": "Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);\r",
+											"pm.environment.set(\"token\", jsonData.result.token);"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"email\": \"root@example.com\",\r\n  \"password\": \"rootpassword\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/auth/login"
+							},
+							"response": []
+						},
+						{
+							"name": "Register",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\r\n  \"username\": \"test\",\r\n  \"email\": \"test@test.com\",\r\n  \"password\": \"test1234\",\r\n  \"phone\": \"1234567890\",\r\n  \"first_name\": \"test\",\r\n  \"last_name\": \"test\",\r\n  \"age\": 18,\r\n  \"gender\": \"male\",\r\n  \"address\": \"demoString\"\r\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": "{{host}}/auth/register"
+							},
+							"response": []
+						},
+						{
+							"name": "Logout",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": "{{host}}/auth/logout"
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": {
+			"token": "{{token}}"
+		}
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "host",
+			"value": "http://localhost:8080/api/v1",
+			"type": "string"
+		}
+	]
+}
