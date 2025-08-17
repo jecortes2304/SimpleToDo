@@ -1,8 +1,9 @@
 import {apiClient} from './apiClient'
-import {ApiResponse} from '../schemas/globals'
+import {ApiResponse, Pagination} from '../schemas/globals'
 import {AxiosResponse} from 'axios'
 import {handleApiError, handleApiResponse} from '../utils/apiUtils'
 import {UpdateUserRequestDto, UserResponseDto} from '../schemas/user'
+
 
 export async function getProfile(): Promise<ApiResponse<UserResponseDto>> {
     try {
@@ -16,7 +17,7 @@ export async function getProfile(): Promise<ApiResponse<UserResponseDto>> {
 
 export async function updateProfile(data: UpdateUserRequestDto): Promise<ApiResponse<UserResponseDto>> {
     try {
-        const res: AxiosResponse<ApiResponse<UserResponseDto>> = await apiClient.put('/profile', data)
+        const res: AxiosResponse<ApiResponse<UserResponseDto>> = await apiClient.patch('/profile', data)
         return handleApiResponse(res)
     } catch (error) {
         console.error('Error updating profile:', error)
@@ -34,15 +35,18 @@ export async function getUserById(id: number): Promise<ApiResponse<UserResponseD
     }
 }
 
-export async function getAllUsers(limit: number, page: number, sort: string): Promise<ApiResponse<UserResponseDto>> {
+export async function getAllUsers(
+    limit: number,
+    page: number,
+    sort: string
+): Promise<ApiResponse<Pagination<UserResponseDto>>> {
     try {
-        const res: AxiosResponse<ApiResponse<UserResponseDto>> = await apiClient.get(`/users`, {
-            params: { limit, page, sort }
-        })
-        return handleApiResponse(res)
+        const res: AxiosResponse<ApiResponse<Pagination<UserResponseDto>>> =
+            await apiClient.get(`/users`, { params: { limit, page, sort } });
+        return handleApiResponse(res);
     } catch (error) {
-        console.error('Error fetching users:', error)
-        return handleApiError<UserResponseDto>(error as AxiosResponse<ApiResponse<UserResponseDto>>)
+        console.error('Error fetching users:', error);
+        return handleApiError<Pagination<UserResponseDto>>(error as AxiosResponse<ApiResponse<Pagination<UserResponseDto>>>);
     }
 }
 

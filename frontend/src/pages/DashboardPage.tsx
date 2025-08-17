@@ -13,79 +13,82 @@ import {
     XAxis,
     YAxis
 } from 'recharts';
-import {getUserProjects} from "../services/ProjectService.ts";
-import {Pagination} from "../schemas/globals.ts";
-import {Project} from "../schemas/projects.ts";
-import {Task} from "../schemas/tasks.ts";
-import {ProjectData, Status, TaskStatusData} from "../schemas/dashboard.ts";
+import {getUserProjects} from '../services/ProjectService';
+import {Pagination} from '../schemas/globals';
+import {Project} from '../schemas/projects';
+import {Task} from '../schemas/tasks';
+import {ProjectData, Status, TaskStatusData} from '../schemas/dashboard';
 
-
-const COLORS = ['#60A5FA', '#FBBF24', '#34D399', '#F87171', '#A78BFA'];
+const STATUS_COLORS: Record<Status, string> = {
+    ongoing: '#60A5FA',
+    cancelled: '#FBBF24',
+    completed: '#34D399',
+    blocked: '#F87171',
+    pending: '#4975e6'
+};
 
 const DashboardPage: React.FC = () => {
     const { t } = useTranslation();
-    const [projects, setProjects] = useState<Project[]>([])
-    const [tasks, setTasks] = useState<Task[]>([])
-    const [projectDataArray, setProjectDataArray] = useState<ProjectData[]>([])
-    const [taskStatusDataArray, setTaskStatusDataArray] = useState<TaskStatusData[]>([])
+    const [projects, setProjects] = useState<Project[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [projectDataArray, setProjectDataArray] = useState<ProjectData[]>([]);
+    const [taskStatusDataArray, setTaskStatusDataArray] = useState<TaskStatusData[]>([]);
 
     const getStatusById = (id: number): Status => {
         switch (id) {
-            case 1:
-                return 'pending'
-            case 2:
-                return 'ongoing'
-            case 3:
-                return 'completed'
-            case 4:
-                return 'blocked'
-            case 5:
-                return 'cancelled'
-            default:
-                return 'pending'
+            case 1: return 'pending';
+            case 2: return 'ongoing';
+            case 3: return 'completed';
+            case 4: return 'blocked';
+            case 5: return 'cancelled';
+            default: return 'pending';
         }
-    }
+    };
 
-    const formatStatus = (status: string) => {
+    const formatStatus = (status: Status) => {
         const translated = t(`tasks.status.${status}`);
         return translated.charAt(0).toUpperCase() + translated.slice(1);
     };
 
-    const getUserProjectsCallback = useCallback(async () => {
-        const response = await getUserProjects(1000, 1, 'asc')
+    const fetchProjects = useCallback(async () => {
+        const response = await getUserProjects(1000, 1, 'asc');
         if (response.ok && response.result) {
-            const projectPagination = response.result as Pagination<Project>
-            setProjects(projectPagination.items)
-            setTasks(projectPagination.items.flatMap((project) => project.tasks))
-        } else {
-            console.error('Error fetching projects:', response.errors as string);
+            const projectPagination = response.result as Pagination<Project>;
+            setProjects(projectPagination.items);
+            setTasks(projectPagination.items.flatMap(p => p.tasks));
         }
-    }, [])
-
-    useEffect(() => {
-        getUserProjectsCallback().then()
     }, []);
 
     useEffect(() => {
-        setProjectDataArray(projects.map((project) => ({
-            name: project.name,
-            tasks: project.tasks.length,
-        })))
+        fetchProjects().then();
+    }, [fetchProjects]);
 
-        setTaskStatusDataArray(tasks.reduce((acc: TaskStatusData[], task) => {
-            const status = getStatusById(task.statusId)
-            const existingStatus = acc.find(item => item.name === status)
+    useEffect(() => {
+        const projectData = projects.map(p => ({
+            name: p.name,
+            tasks: p.tasks.length
+        }));
 
-            if (existingStatus) {
-                existingStatus.value += 1
-            } else {
-                acc.push({ name: status, value: 1 })
-            }
+        const statusCount: Record<Status, number> = {
+            ongoing: 0,
+            cancelled: 0,
+            completed: 0,
+            blocked: 0,
+            pending: 0
+        };
 
-            return acc
-        }, []))
+        tasks.forEach(task => {
+            const status = getStatusById(task.statusId);
+            statusCount[status] += 1;
+        });
+
+        const taskStatusData: TaskStatusData[] = (Object.entries(statusCount) as [Status, number][])
+            .filter(([_, value]) => value > 0)
+            .map(([name, value]) => ({ name, value }));
+
+        setProjectDataArray(projectData);
+        setTaskStatusDataArray(taskStatusData);
     }, [tasks, projects]);
-
 
     return (
         <div className="p-4">
@@ -103,14 +106,17 @@ const DashboardPage: React.FC = () => {
                                 cx="50%"
                                 cy="50%"
                                 outerRadius={100}
-                                label
+                                label={({ name }) => formatStatus(name as Status)}
                             >
-                                {taskStatusDataArray.map((value, index) => (
-                                    <Cell key={`cell-${index}`} name={formatStatus(getStatusById(value.value))} fill={COLORS[index % COLORS.length]} />
+                                {taskStatusDataArray.map((entry, index) => (
+                                    <Cell
+                                        key={`cell-${index}`}
+                                        fill={STATUS_COLORS[entry.name as Status]}
+                                    />
                                 ))}
                             </Pie>
-                            <Tooltip />
-                            <Legend />
+                            <Tooltip formatter={(value, name) => [value, formatStatus(name as Status)]} />
+                            <Legend formatter={(value) => formatStatus(value as Status)} />
                         </PieChart>
                     </ResponsiveContainer>
                 </div>
@@ -121,7 +127,7 @@ const DashboardPage: React.FC = () => {
                         <BarChart data={projectDataArray} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis dataKey="name" />
-                            <YAxis />
+                            <YAxis allowDecimals={false} />
                             <Tooltip />
                             <Legend />
                             <Bar dataKey="tasks" name={t('tasks.tasks')} fill="#3B82F6" />

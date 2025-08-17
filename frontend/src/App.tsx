@@ -11,18 +11,47 @@ import {PrivateRoute} from "./utils/PrivateRoute.tsx";
 import {PublicRoute} from "./utils/PublicRoute.tsx";
 import UsersPage from "./pages/UsersPage.tsx";
 import NotFoundPage from "./pages/NotFoundPage.tsx";
+import VerifyEmailPage from "./pages/VerifyEmailPage.tsx";
+import VerificationEmailPendingPage from "./pages/VerificationEmailPendingPage.tsx";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
+import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
+import {AdminRoute} from "./utils/AdminRoute.tsx";
 
 function App() {
 
     return (
-        <div className="min-h-screen h-screen flex flex-col">
-            <main className="flex-grow min-h-[calc(100vh-4rem)]">
+        <div className="min-h-screen flex flex-col">
+            <main className="flex-1">
                 <Routes>
                     <Route element={<PublicRoute/>}>
                         <Route path="/auth" element={
                             <div>
                                 <AlertManager/>
                                 <AuthPage/>
+                            </div>
+                        }/>
+                        <Route path="/verification-email" element={
+                            <div>
+                                <AlertManager/>
+                                <VerifyEmailPage/>
+                            </div>
+                        }/>
+                        <Route path="/pending-email-verification" element={
+                            <div>
+                                <AlertManager/>
+                                <VerificationEmailPendingPage/>
+                            </div>
+                        }/>
+                        <Route path="/forgot-password" element={
+                            <div>
+                                <AlertManager/>
+                                <ForgotPasswordPage/>
+                            </div>
+                        }/>
+                        <Route path="/reseting-password" element={
+                            <div>
+                                <AlertManager/>
+                                <ResetPasswordPage/>
                             </div>
                         }/>
                     </Route>
@@ -32,7 +61,9 @@ function App() {
                             <Route path="/tasks" element={<TasksPage/>}/>
                             <Route path="/projects" element={<ProjectsPage/>}/>
                             <Route path="/profile" element={<ProfilePage/>}/>
-                            <Route path="/users" element={<UsersPage/>}/>
+                            <Route element={<AdminRoute/>}>
+                                <Route path="/users" element={<UsersPage/>}/>
+                            </Route>
                         </Route>
                     </Route>
                     <Route path="*" element={<NotFoundPage />} />

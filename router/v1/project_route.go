@@ -129,10 +129,76 @@ func ProjectRoutes(db *gorm.DB, apiV1 *echo.Group) {
 	projectGroup := apiV1.Group("/projects")
 	projectGroup.Use(middleware.JWTMiddleware)
 
+	// @Summary      List all projects for the current user
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        limit query int false "Limit per page" default(10)
+	// @Param        page  query int false "Page number" default(1)
+	// @Param        sort  query string false "Sort order" Enums(asc, desc) default(asc)
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /projects/user [get]
 	projectGroup.GET("/user", projectController.getAllProjectsByUser)
+
+	// @Summary      List all projects
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        limit query int false "Limit per page" default(10)
+	// @Param        page  query int false "Page number" default(1)
+	// @Param        sort  query string false "Sort order" Enums(asc, desc) default(asc)
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /projects [get]
 	projectGroup.GET("", projectController.getAllProjects)
+
+	// @Summary      Get a project by ID
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        id path int true "Project ID"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      404 {object} response.StandardResponseError
+	// @Router       /projects/project/{id} [get]
 	projectGroup.GET("/project/:id", projectController.getProjectById)
+
+	// @Summary      Delete a project by ID
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        id path int true "Project ID"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      404 {object} response.StandardResponseError
+	// @Router       /projects/project/{id} [delete]
 	projectGroup.DELETE("/project/:id", projectController.deleteProject)
+
+	// @Summary      Create a new project
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Accept       json
+	// @Produce      json
+	// @Param        payload body request.CreateProjectRequestDto true "Project data"
+	// @Success      201 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /projects/project [post]
 	projectGroup.POST("/project", projectController.saveProject)
+
+	// @Summary      Update a project by ID
+	// @Tags         Projects
+	// @Security     BearerAuth
+	// @Accept       json
+	// @Produce      json
+	// @Param        id path int true "Project ID"
+	// @Param        payload body request.UpdateProjectRequestDto true "Project data"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /projects/project/{id} [put]
 	projectGroup.PUT("/project/:id", projectController.updateProject)
 }

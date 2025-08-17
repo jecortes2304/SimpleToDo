@@ -1,0 +1,1052 @@
+basePath: /api/v1
+definitions:
+  request.CreateProjectRequestDto:
+    properties:
+      description:
+        example: This project aims to develop a new software solution for managing
+          tasks efficiently.
+        maxLength: 300
+        minLength: 20
+        type: string
+      name:
+        example: Project Alpha
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  request.CreateTaskRequestDto:
+    properties:
+      description:
+        example: This is the first task in the project.
+        maxLength: 300
+        minLength: 10
+        type: string
+      title:
+        example: Task 1
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  request.ForgotPasswordRequest:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+      password:
+        example: P@ssw0rd!
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.RegisterRequest:
+    properties:
+      address:
+        example: First Avenue 5, Madrid
+        type: string
+      age:
+        example: 30
+        maximum: 120
+        minimum: 16
+        type: integer
+      birthDate:
+        example: "1995-01-15T00:00:00Z"
+        type: string
+      email:
+        example: jdoe@example.com
+        type: string
+      firstName:
+        example: John
+        maxLength: 100
+        minLength: 2
+        type: string
+      gender:
+        enum:
+        - male
+        - female
+        example: male
+        type: string
+      lastName:
+        example: Doe
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        example: P@ssw0rd!
+        maxLength: 50
+        minLength: 6
+        type: string
+      phone:
+        example: "+34123456789"
+        maxLength: 15
+        minLength: 4
+        type: string
+      username:
+        example: jdoe
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - email
+    - firstName
+    - gender
+    - lastName
+    - password
+    - username
+    type: object
+  request.ResetPasswordRequest:
+    properties:
+      newPassword:
+        example: NewP@ss123
+        maxLength: 50
+        minLength: 6
+        type: string
+      token:
+        example: 6a1fbd97e8...<rest_of_token>
+        minLength: 64
+        type: string
+    required:
+    - newPassword
+    - token
+    type: object
+  request.UpdateProjectRequestDto:
+    properties:
+      description:
+        example: This project aims to develop a new software solution for managing
+          tasks efficiently.
+        maxLength: 300
+        minLength: 20
+        type: string
+      name:
+        example: Project Alpha
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  request.UpdateTaskRequestDto:
+    properties:
+      description:
+        example: This is the first task in the project.
+        maxLength: 300
+        minLength: 10
+        type: string
+      status:
+        enum:
+        - pending
+        - ongoing
+        - completed
+        - blocked
+        - cancelled
+        example: pending
+        type: string
+      title:
+        example: Task 1
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - status
+    - title
+    type: object
+  request.UpdateUserRequest:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      firstName:
+        example: John
+        maxLength: 50
+        minLength: 2
+        type: string
+      image:
+        items:
+          type: integer
+        type: array
+      lastName:
+        example: Doe
+        maxLength: 50
+        minLength: 2
+        type: string
+      phone:
+        example: "+123456789"
+        maxLength: 15
+        minLength: 4
+        type: string
+    type: object
+  response.StandardResponseError:
+    properties:
+      errors: {}
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.StandardResponseOk:
+    properties:
+      result: {}
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.StandardResponseOkPaginated:
+    properties:
+      items: {}
+      limit:
+        type: integer
+      page:
+        type: integer
+      sort:
+        type: string
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+      totalItems:
+        type: integer
+      totalPages:
+        type: integer
+    type: object
+host: localhost:8000
+info:
+  contact:
+    email: support@example.com
+    name: API Support
+    url: https://example.com/support
+  description: REST API for SimpleToDo. Includes authentication, email verification,
+    password reset, projects, tasks management.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: https://example.com/terms
+  title: SimpleToDo API
+  version: 1.0.0
+paths:
+  /auth/forgot:
+    post:
+      consumes:
+      - application/json
+      description: Send password reset email if account exists
+      parameters:
+      - description: Forgot password payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Forgot password
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and return a JWT
+      parameters:
+      - description: Login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Login
+      tags:
+      - Auth
+  /auth/logout:
+    delete:
+      description: Invalidate user session on the client
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user and send verification email
+      parameters:
+      - description: Register payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Register
+      tags:
+      - Auth
+  /auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend email verification link if the user is not verified
+      parameters:
+      - description: Resend verification payload (email)
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Resend verification email
+      tags:
+      - Auth
+  /auth/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset password using a one-time token sent by email
+      parameters:
+      - description: Reset password payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Reset password
+      tags:
+      - Auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify user email using a token sent after registration
+      parameters:
+      - description: Email verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Verify email
+      tags:
+      - Auth
+  /profile:
+    get:
+      description: Retrieve the profile of the authenticated user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Profile
+    patch:
+      consumes:
+      - application/json
+      description: Update the profile of the authenticated user
+      parameters:
+      - description: Profile update payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update current user profile
+      tags:
+      - Profile
+  /projects:
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all projects
+      tags:
+      - Projects
+  /projects/project:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProjectRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create a new project
+      tags:
+      - Projects
+  /projects/project/{id}:
+    delete:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete a project by ID
+      tags:
+      - Projects
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get a project by ID
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Project data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProjectRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update a project by ID
+      tags:
+      - Projects
+  /projects/user:
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all projects for the current user
+      tags:
+      - Projects
+  /tasks:
+    delete:
+      parameters:
+      - description: Comma-separated task IDs
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete multiple tasks by IDs
+      tags:
+      - Tasks
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all tasks for the current user
+      tags:
+      - Tasks
+  /tasks/{projectId}:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: integer
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all tasks by project for the current user
+      tags:
+      - Tasks
+  /tasks/task/{id}:
+    get:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get a task by ID
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateTaskRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update a task by ID
+      tags:
+      - Tasks
+  /tasks/task/{projectId}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTaskRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create a new task in a project
+      tags:
+      - Tasks
+  /users:
+    get:
+      description: Retrieve a paginated list of all users (Admin only)
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOkPaginated'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+  /users/user/{id}:
+    delete:
+      description: Delete a specific user by ID (Admin only, cannot delete admin users)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      description: Retrieve details of a specific user by ID (Admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      description: Update user details by ID (Admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: User update payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: 'Provide your JWT as: Bearer <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"

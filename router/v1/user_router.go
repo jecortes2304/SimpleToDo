@@ -22,7 +22,7 @@ func NewUserController(s *service.UserService) *UserController {
 	return &UserController{UserService: s}
 }
 
-func (uc *UserController) GetUserByID(c echo.Context) error {
+func (uc *UserController) getUserByID(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -35,7 +35,7 @@ func (uc *UserController) GetUserByID(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "User fetched successfully", user, false)
 }
 
-func (uc *UserController) GetAllUsers(c echo.Context) error {
+func (uc *UserController) getAllUsers(c echo.Context) error {
 	pagination, err := validatePagination(c)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Bad request error", err.Error(), true)
@@ -47,7 +47,7 @@ func (uc *UserController) GetAllUsers(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "Users fetched successfully", users, false)
 }
 
-func (uc *UserController) UpdateUser(c echo.Context) error {
+func (uc *UserController) updateUser(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -75,7 +75,7 @@ func (uc *UserController) UpdateUser(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "User updated successfully", updatedUser, false)
 }
 
-func (uc *UserController) DeleteUser(c echo.Context) error {
+func (uc *UserController) deleteUser(c echo.Context) error {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
@@ -102,8 +102,7 @@ func (uc *UserController) DeleteUser(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "User deleted successfully", nil, false)
 }
 
-// GetUserProfile retrieves the profile of the currently authenticated user
-func (uc *UserController) GetUserProfile(c echo.Context) error {
+func (uc *UserController) getUserProfile(c echo.Context) error {
 	id := c.Get("user_id").(float64)
 	user, err := uc.UserService.GetByID(uint(id))
 	if err != nil {
@@ -112,7 +111,7 @@ func (uc *UserController) GetUserProfile(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "User profile fetched successfully", user, false)
 }
 
-func (uc *UserController) UpdateProfile(c echo.Context) error {
+func (uc *UserController) updateProfile(c echo.Context) error {
 	id := c.Get("user_id").(float64)
 	var body request.UpdateUserRequest
 	if err := c.Bind(&body); err != nil {
@@ -137,7 +136,6 @@ func (uc *UserController) UpdateProfile(c echo.Context) error {
 
 func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	userRepository := repository.NewUserRepository(db)
-
 	userMapper := mapper.NewUserMapperImpl()
 	userService := service.NewUserService(userRepository, userMapper)
 	userController := NewUserController(userService)
@@ -149,12 +147,81 @@ func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	userProfileGroup := v1.Group("/profile")
 	userProfileGroup.Use(middleware.JWTMiddleware)
 
-	usersGroup.GET("", userController.GetAllUsers)
-	usersGroup.GET("/user/:id", userController.GetUserByID)
-	usersGroup.DELETE("/user/:id", userController.DeleteUser)
-	usersGroup.PUT("/user/:id", userController.UpdateUser)
+	// @Summary Get all users
+	// @Description Retrieve a paginated list of all users (Admin only)
+	// @Tags Users
+	// @Security BearerAuth
+	// @Param page query int false "Page number"
+	// @Param limit query int false "Items per page"
+	// @Success 200 {object} response.StandardResponseOkPaginated
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 403 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /users [get]
+	usersGroup.GET("", userController.getAllUsers)
 
-	userProfileGroup.GET("", userController.GetUserProfile)
-	userProfileGroup.PUT("", userController.UpdateProfile)
+	// @Summary Get user by ID
+	// @Description Retrieve details of a specific user by ID (Admin only)
+	// @Tags Users
+	// @Security BearerAuth
+	// @Param id path int true "User ID"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 403 {object} response.StandardResponseError
+	// @Failure 404 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /users/user/{id} [get]
+	usersGroup.GET("/user/:id", userController.getUserByID)
 
+	// @Summary Delete user
+	// @Description Delete a specific user by ID (Admin only, cannot delete admin users)
+	// @Tags Users
+	// @Security BearerAuth
+	// @Param id path int true "User ID"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 403 {object} response.StandardResponseError
+	// @Failure 404 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /users/user/{id} [delete]
+	usersGroup.DELETE("/user/:id", userController.deleteUser)
+
+	// @Summary Update user
+	// @Description Update user details by ID (Admin only)
+	// @Tags Users
+	// @Security BearerAuth
+	// @Param id path int true "User ID"
+	// @Param user body request.UpdateUserRequest true "User update payload"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 403 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /users/user/{id} [put]
+	usersGroup.PUT("/user/:id", userController.updateUser)
+
+	// @Summary Get current user profile
+	// @Description Retrieve the profile of the authenticated user
+	// @Tags Profile
+	// @Security BearerAuth
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /profile [get]
+	userProfileGroup.GET("", userController.getUserProfile)
+
+	// @Summary Update current user profile
+	// @Description Update the profile of the authenticated user
+	// @Tags Profile
+	// @Security BearerAuth
+	// @Accept json
+	// @Produce json
+	// @Param user body request.UpdateUserRequest true "Profile update payload"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /profile [patch]
+	userProfileGroup.PATCH("", userController.updateProfile)
 }

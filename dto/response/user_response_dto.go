@@ -3,6 +3,7 @@ package response
 import "time"
 
 type UserResponseDto struct {
+	Id        uint      `json:"id"`
 	FirstName string    `json:"firstName,omitempty"`
 	LastName  string    `json:"lastName,omitempty"`
 	Age       int       `json:"age,omitempty"`

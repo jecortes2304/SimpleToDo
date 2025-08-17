@@ -4,6 +4,7 @@ import (
 	"SimpleToDo/dto/response"
 	"SimpleToDo/models"
 	"errors"
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -31,6 +32,9 @@ func (r *UserRepository) FindAll(pagination response.Pagination) (*response.Pagi
 	result := r.Db.Scopes(Paginate(&models.User{}, &pagination, r.Db)).Preload("Role").Find(&users)
 	if result.Error != nil {
 		return nil, result.Error
+	}
+	for i := range users {
+		fmt.Println(users[i].ID)
 	}
 	pagination.Items = users
 
