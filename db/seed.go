@@ -1,61 +1,144 @@
 package db
 
 import (
-	"SimpleToDo"
+	embedfs "SimpleToDo"
+	"SimpleToDo/config"
 	"SimpleToDo/models"
+	"errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"log"
-	"strings"
 	"time"
 )
 
+type UserRootDtoEnvs struct {
+	FirstName string
+	LastName  string
+	Phone     string
+	Email     string
+	Username  string
+	Password  string
+}
+
 func Seed(db *gorm.DB) {
-	sqlBytes, err := embedfs.SQLFS.ReadFile("db/data.sql")
-	if err != nil {
-		log.Fatalf("Error al leer el archivo SQL embebido: %v", err)
-	}
-
-	sqlStatements := strings.Split(string(sqlBytes), ";")
-	for _, stmt := range sqlStatements {
-		stmt = strings.TrimSpace(stmt)
-		if stmt != "" {
-			if err := db.Exec(stmt).Error; err != nil {
-				log.Fatalf("Error al ejecutar SQL: %v", err)
+	err := db.Transaction(func(tx *gorm.DB) error {
+		statuses := []models.Status{
+			{ID: 1, Name: "PENDING", Value: "pending"},
+			{ID: 2, Name: "ONGOING", Value: "ongoing"},
+			{ID: 3, Name: "COMPLETED", Value: "completed"},
+			{ID: 4, Name: "BLOCKED", Value: "blocked"},
+			{ID: 5, Name: "CANCELLED", Value: "cancelled"},
+		}
+		for _, s := range statuses {
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&s).Error; err != nil {
+				return err
 			}
 		}
-	}
 
-	imageBytes, err := embedfs.ImageFS.ReadFile("config/root_image.png")
-	if err != nil {
-		log.Fatalf("Error al leer la imagen embebida: %v", err)
-	}
-
-	for _, stmt := range sqlStatements {
-		stmt = strings.TrimSpace(stmt)
-		if stmt != "" {
-			if err := db.Exec(stmt).Error; err != nil {
-				log.Fatalf("Error al ejecutar SQL: %v", err)
+		roles := []models.Role{
+			{ID: 1, Name: "Admin", Value: "admin"},
+			{ID: 2, Name: "USER", Value: "user"},
+		}
+		for _, r := range roles {
+			if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&r).Error; err != nil {
+				return err
 			}
 		}
+
+		imageBytes, err := embedfs.ImageFS.ReadFile("config/static/root_image.png")
+		if err != nil {
+			return err
+		}
+		userRoot := getUserRootFromEnv()
+
+		var root models.User
+		if err := tx.Where("username = ?", "root").First(&root).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				root = models.User{
+					FirstName: userRoot.FirstName,
+					LastName:  userRoot.LastName,
+					Age:       30,
+					Gender:    "male",
+					Email:     userRoot.Email,
+					Phone:     userRoot.Phone,
+					Username:  userRoot.Username,
+					Image:     imageBytes,
+					Password:  userRoot.Password,
+					BirthDate: time.Now(),
+					Address:   "Madrid, Spain",
+					RoleId:    1,
+					Verified:  true,
+				}
+				if err := tx.Create(&root).Error; err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		var project models.Project
+		if err := tx.Where("id = ?", 1).First(&project).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				project = models.Project{
+					ID:          1,
+					Name:        "Default Project",
+					Description: "Dummy project by default",
+					UserId:      root.ID,
+				}
+				if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&project).Error; err != nil {
+					return err
+				}
+			} else {
+				return err
+			}
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		log.Fatalf("seed error: %v", err)
 	}
 
-	user := models.User{
-		FirstName: "Root",
-		LastName:  "Admin",
-		Age:       30,
-		Gender:    "male",
-		Email:     "root@example.com",
-		Phone:     "123456789",
-		Username:  "root",
-		Image:     imageBytes,
-		Password:  "rootpassword",
-		BirthDate: time.Now(),
-		Address:   "First Avenue 5, Madrid, Spain",
-		RoleId:    1,
+	log.Println("✅ Seed completed.")
+}
+
+func getUserRootFromEnv() UserRootDtoEnvs {
+	env := config.GetAppEnv()
+	firstName := env.RootFirstName
+	if firstName == "" {
+		firstName = "Root"
 	}
-	if err := db.FirstOrCreate(&user, models.User{Username: "root"}).Error; err != nil {
-		log.Fatalf("Error inserting user: %v", err)
+	lastName := env.RootLastName
+	if lastName == "" {
+		lastName = "Admin"
+	}
+	phone := env.RootPhone
+	if phone == "" {
+		panic("ROOT_PHONE environment variable is not set")
+	}
+	email := env.RootEmail
+	if email == "" {
+		panic("ROOT_EMAIL environment variable is not set")
+	}
+	username := env.RootUsername
+	if username == "" {
+		panic("ROOT_USERNAME environment variable is not set")
+	}
+	password := env.RootPassword
+	if password == "" {
+		panic("ROOT_PASSWORD environment variable is not set")
 	}
 
-	log.Println("✅ Seed completed correctly.")
+	var userRoot = UserRootDtoEnvs{
+		FirstName: firstName,
+		LastName:  lastName,
+		Email:     email,
+		Phone:     phone,
+		Username:  username,
+		Password:  password,
+	}
+
+	return userRoot
 }

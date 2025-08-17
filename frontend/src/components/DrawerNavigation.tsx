@@ -1,34 +1,25 @@
 import React from "react";
-// import {useCallback, useEffect, useState} from "react";
 import NavBar from "./NavBar";
 import {useTranslation} from "react-i18next";
 import {Outlet} from "react-router-dom";
-import {AlertManager} from "./AlertManager.tsx";
+import {AlertManager} from "./AlertManager";
 import {ClipboardIcon, FolderIcon, HomeIcon} from "@heroicons/react/24/solid";
-// import {getProfile} from "../services/UserService.ts";
-// import {User} from "../schemas/user.ts";
-// import {useAlert} from "../hooks/useAlert.ts";
-// import {UsersIcon} from "@heroicons/react/16/solid";
+import {UsersIcon} from "@heroicons/react/16/solid";
+
+function getRoleFromToken(): number | null {
+    const t = localStorage.getItem('token');
+    if (!t) return null;
+    try {
+        const payload = JSON.parse(atob(t.split('.')[1]));
+        return typeof payload.role === 'number' ? payload.role : null;
+    } catch {
+        return null;
+    }
+}
 
 const DrawerNavigation: React.FC = () => {
     const { t } = useTranslation();
-    // const [user, setUser] = useState<User | null>(null)
-    // const alert = useAlert()
-
-    // const fetchProfileCallback = useCallback(async () => {
-    //     const res = await getProfile()
-    //     if (res.ok && res.result) {
-    //         const data = res.result as User
-    //         // setUser(data)
-    //     } else {
-    //         alert(t('profile.errorLoading'), 'alert-error')
-    //     }
-    // }, [])
-    //
-    // useEffect(() => {
-    //     fetchProfileCallback().then()
-    // }, [fetchProfileCallback])
-
+    const role = getRoleFromToken(); // 1 => Admin/Root
 
     return (
         <div className="drawer lg:drawer-open h-full">
@@ -46,10 +37,7 @@ const DrawerNavigation: React.FC = () => {
                     <div className="flex flex-col w-full items-center mb-8">
                         <div className="avatar mt-8 ">
                             <div className="w-20 rounded-2xl ring ring-primary ring-offset-base-100 ring-offset-2">
-                                <img
-                                    src="/logo.svg"
-                                    alt="User Avatar"
-                                />
+                                <img src="/logo.svg" alt="User Avatar" />
                             </div>
                         </div>
                         <span className="mt-8 font-bold text-lg">SimpleToDo</span>
@@ -75,14 +63,15 @@ const DrawerNavigation: React.FC = () => {
                             {t('projects.projects')}
                         </a>
                     </li>
-                    {/*{user && user?.role === "Admin" && (*/}
-                    {/*    <li className="text-lg">*/}
-                    {/*        <a href="/users" className="flex items-center gap-2">*/}
-                    {/*            <UsersIcon className="h-5 w-5" />*/}
-                    {/*            {t('users.users')}*/}
-                    {/*        </a>*/}
-                    {/*    </li>*/}
-                    {/*)}*/}
+
+                    {role === 1 && (
+                        <li className="text-lg">
+                            <a href="/users" className="flex items-center gap-2">
+                                <UsersIcon className="h-5 w-5" />
+                                {t('users.users')}
+                            </a>
+                        </li>
+                    )}
                 </ul>
             </div>
         </div>

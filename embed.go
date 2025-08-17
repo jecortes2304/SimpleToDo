@@ -6,14 +6,14 @@ import (
 )
 
 var (
-	//go:embed config/banner.txt
+	//go:embed config/static/banner.txt
 	BannerFS embed.FS
 
-	//go:embed config/root_image.png
+	//go:embed config/static/root_image.png
 	ImageFS embed.FS
 
-	//go:embed db/data.sql
-	SQLFS embed.FS
+	//go:embed config/static/templates/*.html
+	TemplatesFS embed.FS
 
 	//go:embed frontend/dist/*
 	StaticFS embed.FS

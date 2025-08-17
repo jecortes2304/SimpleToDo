@@ -258,10 +258,78 @@ func TaskRouters(db *gorm.DB, v1 *echo.Group) {
 	tasksGroup := v1.Group("/tasks")
 	tasksGroup.Use(middleware.JWTMiddleware)
 
+	// @Summary      List all tasks for the current user
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        limit query int false "Limit per page" default(10)
+	// @Param        page  query int false "Page number" default(1)
+	// @Param        sort  query string false "Sort order" Enums(asc, desc) default(asc)
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /tasks [get]
 	tasksGroup.GET("", taskController.getAll)
+
+	// @Summary      List all tasks by project for the current user
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        projectId path int true "Project ID"
+	// @Param        limit query int false "Limit per page" default(10)
+	// @Param        page  query int false "Page number" default(1)
+	// @Param        sort  query string false "Sort order" Enums(asc, desc) default(asc)
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /tasks/{projectId} [get]
 	tasksGroup.GET("/:projectId", taskController.getAllTaskByProject)
+
+	// @Summary      Get a task by ID
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        id path int true "Task ID"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      404 {object} response.StandardResponseError
+	// @Router       /tasks/task/{id} [get]
 	tasksGroup.GET("/task/:id", taskController.getTaskById)
+
+	// @Summary      Delete multiple tasks by IDs
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Produce      json
+	// @Param        ids query string true "Comma-separated task IDs" example:"1,2,3"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      500 {object} response.StandardResponseError
+	// @Router       /tasks [delete]
 	tasksGroup.DELETE("", taskController.deleteTasks)
+
+	// @Summary      Create a new task in a project
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Accept       json
+	// @Produce      json
+	// @Param        projectId path int true "Project ID"
+	// @Param        payload body request.CreateTaskRequestDto true "Task data"
+	// @Success      201 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      404 {object} response.StandardResponseError
+	// @Router       /tasks/task/{projectId} [post]
 	tasksGroup.POST("/task/:projectId", taskController.saveTask)
+
+	// @Summary      Update a task by ID
+	// @Tags         Tasks
+	// @Security     BearerAuth
+	// @Accept       json
+	// @Produce      json
+	// @Param        id path int true "Task ID"
+	// @Param        payload body request.UpdateTaskRequestDto true "Task data"
+	// @Success      200 {object} response.StandardResponseOk
+	// @Failure      400 {object} response.StandardResponseError
+	// @Failure      404 {object} response.StandardResponseError
+	// @Router       /tasks/task/{id} [put]
 	tasksGroup.PUT("/task/:id", taskController.updateTask)
 }

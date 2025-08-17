@@ -94,7 +94,8 @@
     "ageRestriction": "You must be at least 16 years old to register",
     "passwordHint": "Must be a password greater than 6 characters and less than 50",
     "registerSuccess": "Register success",
-    "emailHint": "Email must be greater than 6 characters and less than 50"
+    "emailHint": "Email must be greater than 6 characters and less than 50",
+    "forgotPassword": "Forgot Password?"
   },
   "profile": {
     "title": "User Profile",
@@ -120,5 +121,35 @@
     "goHome": "Go Home",
     "error404": "Error 404",
     "pageNotFound": "Page not found"
+  },
+  "verifyEmail": {
+    "verifying": "Verifying your email...",
+    "success": "Your email has been verified successfully!",
+    "linkExpiredOrUsed": "The link has expired or was already used.",
+    "tokenMissing": "Invalid or missing token.",
+    "resend": "Resend verification email",
+    "emailPlaceholder": "Enter your email",
+    "resentOk": "Verification email sent. Please check your inbox.",
+    "resentError": "Could not resend verification email.",
+    "goLogin": "Go to login"
+  },
+  "verifyEmailPending": {
+    "title": "Verify your email",
+    "sentToEmail": "We sent a verification email to {{email}}.",
+    "sentGeneric": "We sent a verification email to your inbox.",
+    "tips": "If you don't see it, check your spam folder or wait a minute."
+  },
+  "resetPassword": {
+    "title": "Reset Password",
+    "newPasswordPlaceholder": "New Password",
+    "confirmPasswordPlaceholder": "Confirm New Password",
+    "submit": "Update Password",
+    "updating": "Updating...",
+    "success": "Password updated successfully",
+    "goLogin": "Go to login",
+    "tokenMissing": "Reset token missing or invalid",
+    "passwordMismatch": "Passwords do not match"
   }
+
+
 }

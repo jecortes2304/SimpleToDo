@@ -1,11 +1,13 @@
 package middleware
 
 import (
+	"SimpleToDo/config"
 	"SimpleToDo/dto/response"
+	"net/http"
+	"strings"
+
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
-	"net/http"
-	"os"
 )
 
 func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
@@ -15,9 +17,13 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Missing token", "", true)
 		}
 
-		tokenStr := authHeader[len("Bearer "):]
+		if !strings.HasPrefix(strings.ToLower(authHeader), "bearer ") {
+			authHeader = "Bearer " + authHeader
+		}
+
+		tokenStr := strings.TrimSpace(authHeader[len("Bearer "):])
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
-			secret := os.Getenv("JWT_SECRET")
+			secret := config.GetAppEnv().JWTSecret
 			if secret == "" {
 				secret = "supersecretkey"
 			}
