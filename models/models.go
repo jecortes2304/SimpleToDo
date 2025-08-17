@@ -58,6 +58,31 @@ type User struct {
 	RoleId     uint      `json:"roleId,omitempty"`
 	Address    string    `json:"address,omitempty"`
 	Role       Role      `gorm:"foreignKey:RoleId" json:"role"`
+	Verified   bool      `gorm:"default:false"`
+}
+
+type EmailVerificationToken struct {
+	ID        uint `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	UserID    uint   `gorm:"not null;index"`
+	TokenHash string `gorm:"size:64;not null;uniqueIndex"`
+	ExpiresAt time.Time
+	Used      bool `gorm:"not null;default:false"`
+}
+
+type PasswordResetToken struct {
+	ID        uint `gorm:"primaryKey"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+
+	UserID    uint      `gorm:"not null;index"`
+	TokenHash string    `gorm:"size:64;not null;uniqueIndex"`
+	ExpiresAt time.Time `gorm:"not null"`
+	Used      bool      `gorm:"not null;default:false"`
 }
 
 func (u *User) BeforeCreate(*gorm.DB) (err error) {

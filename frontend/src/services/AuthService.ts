@@ -33,3 +33,45 @@ export async function logout(): Promise<ApiResponse<null>> {
         return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
 }
+
+export async function verifyEmail(token: string): Promise<ApiResponse<null>> {
+    try {
+        const res: AxiosResponse<ApiResponse<null>> = await apiClient.post(`/auth/verify-email?token=${token}`)
+        return handleApiResponse<null>(res)
+    } catch (error) {
+        console.error('Error logging out:', error)
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
+    }
+}
+
+export async function resendVerification(email: string): Promise<ApiResponse<null>> {
+    try {
+        const res: AxiosResponse<ApiResponse<null>> = await apiClient.post(`/auth/resend-verification`, {email})
+        return handleApiResponse<null>(res)
+    } catch (error) {
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
+    }
+
+}
+
+export async function resetPassword(token: string, newPassword: string): Promise<ApiResponse<null>> {
+    try {
+        const res: AxiosResponse<ApiResponse<null>> = await apiClient.post(`/auth/reset`, {
+            token,
+            newPassword
+        });
+        return handleApiResponse<null>(res);
+    } catch (error) {
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>);
+    }
+}
+
+export async function forgotPassword(email: string): Promise<ApiResponse<null>> {
+    try {
+        const res = await apiClient.post('/auth/forgot', { email });
+        return handleApiResponse<null>(res);
+    } catch (error) {
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>);
+    }
+}
+

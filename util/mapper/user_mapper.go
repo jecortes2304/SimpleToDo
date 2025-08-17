@@ -17,6 +17,7 @@ func NewUserMapperImpl() *UserMapperImpl {
 func (t *UserMapperImpl) ToDto(userEntity *models.User) response.UserResponseDto {
 
 	return response.UserResponseDto{
+		Id:        userEntity.ID,
 		FirstName: userEntity.FirstName,
 		LastName:  userEntity.LastName,
 		Age:       userEntity.Age,

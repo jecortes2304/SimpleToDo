@@ -2,22 +2,26 @@ package main
 
 import (
 	embedfs "SimpleToDo"
+	"SimpleToDo/config"
 	"SimpleToDo/db"
+	_ "SimpleToDo/docs"
 	"SimpleToDo/router"
 	"SimpleToDo/util"
 	"fmt"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
-	"github.com/spf13/pflag"
+	_ "github.com/swaggo/echo-swagger"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
+	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 	"time"
 )
 
-func applyMiddlewares(e *echo.Echo, showLogs *bool) {
+func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string) {
 
 	if !*showLogs {
 		e.Logger.SetLevel(log.OFF)
@@ -29,11 +33,9 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool) {
 
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: []string{
-			"http://localhost:*", "http://127.0.0.1:*",
-		},
+		AllowOrigins: *corsOrigins,
 		AllowMethods: []string{
-			echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.OPTIONS,
+			echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS,
 		},
 		AllowHeaders: []string{
 			"Content-Type", "Authorization",
@@ -43,8 +45,9 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool) {
 
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: func(c echo.Context) bool {
-			// Skip the proxy if the prefix is /api
-			return len(c.Path()) >= 4 && c.Path()[:4] == "/api"
+			path := c.Request().URL.Path
+			// Jump over API and Swagger paths to avoid serving static files for them.
+			return strings.HasPrefix(path, "/api") || strings.HasPrefix(path, "/swagger")
 		},
 		// Root directory from where the static content is served.
 		Root: "/",
@@ -79,39 +82,72 @@ func openBrowser(url string) {
 	}
 }
 
+// @title           SimpleToDo API
+// @version         1.0.0
+// @description     REST API for SimpleToDo. Includes authentication, email verification, password reset, projects, tasks management.
+// @termsOfService  https://example.com/terms
+
+// @contact.name    API Support
+// @contact.url     https://example.com/support
+// @contact.email   support@example.com
+
+// @license.name    MIT
+// @license.url     https://opensource.org/licenses/MIT
+
+// @host      localhost:8000
+// @BasePath  /api/v1
+// @schemes   http
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
+// @description Provide your JWT as: Bearer <token>
 func main() {
-	port := pflag.Int("port", 8000, "Port to run the server on")
-	openBrowserVal := pflag.Bool("openbrowser", true, "Open browser on start")
-	showLogs := pflag.Bool("showlogs", true, "Show logs in console")
 
-	pflag.Parse()
+	if err := config.EnsureEnvInteractive(); err != nil {
+		fmt.Println("❌ Invalid config:", err)
+		os.Exit(1)
+	}
 
-	fmt.Println("Port:", *port)
-	fmt.Println("Open browser:", *openBrowserVal)
-	fmt.Println("Show logs:", *showLogs)
+	if err := config.LoadEnvFromAppDir(); err != nil {
+		fmt.Println("❌ Error loading .env:", err)
+		os.Exit(1)
+	}
 
 	e := echo.New()
 
-	e.FileFS("/", "index.html", embedfs.DistIndexHTML)
-	e.StaticFS("/", embedfs.DistDirFS)
-
 	e.HideBanner = true
 	util.PrintBanner()
-	applyMiddlewares(e, showLogs)
+
+	env := config.GetAppEnv()
+	applyMiddlewares(e, &env.ShowLogs, &env.CorsOrigin)
 
 	errDb, DB := db.InitDB()
 	if errDb != nil {
 		fmt.Println("Error initializing database:", errDb)
 		return
 	}
+
+	// Initialize routes
 	router.InitRouters(e, DB)
 
-	if *openBrowserVal {
+	// Serve Swagger UI at /swagger/index.html
+	e.GET("/swagger/*", echoSwagger.WrapHandler)
+
+	// Serve static files from the embedded filesystem
+	e.FileFS("/", "index.html", embedfs.DistIndexHTML)
+	e.StaticFS("/", embedfs.DistDirFS)
+
+	if env.OpenBrowser {
 		go func() {
 			time.Sleep(1 * time.Second)
-			openBrowser(fmt.Sprintf("http://127.0.0.1:%d", *port))
+			if (env.Scheme == "http" || env.Scheme == "https") && env.Host != "" {
+				openBrowser(fmt.Sprintf("%s://%s:%d", env.Scheme, env.Host, env.Port))
+			} else {
+				fmt.Println("⚠️  SCHEME or HOST are not set properly in .env file.")
+			}
 		}()
 	}
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", *port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", env.Port)))
 }

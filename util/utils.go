@@ -6,7 +6,7 @@ import (
 )
 
 func PrintBanner() {
-	banner, err := embedfs.BannerFS.ReadFile("config/banner.txt")
+	banner, err := embedfs.BannerFS.ReadFile("config/static/banner.txt")
 	if err != nil {
 		fmt.Println("⚠️ Banner not found:", err)
 		return

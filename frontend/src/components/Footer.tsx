@@ -12,7 +12,8 @@ const Footer: React.FC = () => {
     }, [refreshTheme]);
 
     return (
-        <footer className="footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4" data-theme={theme}>
+        <footer className="fixed bottom-0 w-full
+        footer sm:footer-horizontal footer-center bg-base-300 text-base-content p-4" data-theme={theme}>
             <aside>
                 <p>Copyright © {new Date().getFullYear()} - All right reserved by CorteStudios</p>
             </aside>

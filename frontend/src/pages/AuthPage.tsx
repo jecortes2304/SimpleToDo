@@ -2,13 +2,14 @@ import React, {FormEvent, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAlert} from '../hooks/useAlert'
 import {useNavigate} from 'react-router-dom'
-import {GenderType, TokenResponse} from "../schemas/auth.ts";
+import {GenderType, RegisterDto, TokenResponse} from "../schemas/auth.ts";
 import {ApiResponse, ThemeColor} from "../schemas/globals.ts";
 import "react-day-picker/style.css";
 import {login, register} from "../services/AuthService.ts";
 import {
     CalendarIcon,
     EnvelopeIcon,
+    EyeIcon,
     LockClosedIcon,
     PhoneIcon,
     UserCircleIcon,
@@ -32,6 +33,8 @@ const AuthPage: React.FC = () => {
     const [gender, setGender] = useState<GenderType | string>('male')
     const [date, setDate] = useState<Date | undefined>();
 
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+
     const isDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches
     const theme = localStorage.getItem('theme') as ThemeColor || (isDarkMode ? ThemeColor.DARK : ThemeColor.LIGHT)
 
@@ -47,6 +50,7 @@ const AuthPage: React.FC = () => {
     const toggleMode = () => setIsLogin(!isLogin)
 
     const handlerAuthErrors = (response: ApiResponse<any>) => {
+        setIsLoading(false);
         if (response.errors instanceof Array) {
             response.errors.forEach((error) => {
                 alert(error, 'alert-error')
@@ -61,6 +65,7 @@ const AuthPage: React.FC = () => {
         e.stopPropagation()
         e.preventDefault()
 
+        setIsLoading(true);
 
         if (!email || !password || (!isLogin && !username)) {
             alert(t('auth.fieldsRequired'), 'alert-error')
@@ -70,6 +75,7 @@ const AuthPage: React.FC = () => {
         if (isLogin) {
             const response = await login({email, password})
             if (response.ok && response.statusCode === 200) {
+                setIsLoading(false);
                 const tokenResponse = response.result as TokenResponse
                 localStorage.setItem('token', tokenResponse.token || '')
                 alert(t('auth.loginSuccess'), 'alert-success')
@@ -83,7 +89,8 @@ const AuthPage: React.FC = () => {
                 alert(t('auth.ageRestriction'), 'alert-error')
                 return
             }
-            const response = await register({
+
+            const userToRegister: RegisterDto = {
                 username: username,
                 email: email,
                 password: password,
@@ -94,11 +101,13 @@ const AuthPage: React.FC = () => {
                 age: age,
                 address: '',
                 birthDate: date ? date.toISOString() : ''
-            })
+            }
+            const response = await register(userToRegister)
             if (response.ok && (response.statusCode === 201 || response.statusCode === 200)) {
+                setIsLoading(false);
                 alert(t('auth.registerSuccess'), 'alert-success')
                 setTimeout(() => {
-                    navigate('/', {replace: true})
+                    navigate('/pending-email-verification', {state: {email: email}});
                 })
             } else {
                 handlerAuthErrors(response as ApiResponse<any>)
@@ -106,8 +115,16 @@ const AuthPage: React.FC = () => {
         }
     }
 
+    const toggleVisibility = (e: React.MouseEvent<SVGSVGElement>) => {
+        e.preventDefault();
+        const input = e.currentTarget.parentElement?.querySelector('input');
+        if (input) {
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+    }
+
     return (
-        <div className="min-h-screen flex items-center justify-center bg-base-200" data-theme={theme}>
+        <div className="min-h-screen flex items-center justify-center bg-base-200 py-12" data-theme={theme}>
             <div className="w-full max-w-md p-8 space-y-4 bg-base-100 shadow-xl rounded-lg">
                 <h2 className="text-2xl font-bold text-center">
                     {isLogin ? t('auth.loginTitle') : t('auth.registerTitle')}
@@ -265,17 +282,36 @@ const AuthPage: React.FC = () => {
                                     minLength={6}
                                     maxLength={50}
                                     title={t('auth.passwordHint')}/>
+                                <EyeIcon className="cursor-pointer rounded-full h-[1em] opacity-50"
+                                         onClick={toggleVisibility}/>
                             </label>
                             <p className="validator-hint">
                                 {t('auth.passwordHint')}
                             </p>
                         </div>
-                    </>
 
+                        <div className="text-right w-full" hidden={!isLogin}>
+                            <button
+                                type="button"
+                                className="link link-primary text-sm"
+                                onClick={() => navigate('/forgot-password')}
+                            >
+                                {t('auth.forgotPassword')}
+                            </button>
+                        </div>
+                    </>
                     <div className="form-control mt-6">
-                        <button type="submit" className="btn btn-primary mx-auto">
-                            {isLogin ? t('auth.login') : t('auth.register')}
-                        </button>
+                        {isLoading ? (
+                                <div className="justify-center flex mb-4">
+                                    <span className="loading loading-spinner loading-lg text-primary mb-4"/>
+                                </div>
+                            ) :
+                            (
+                                <button type="submit" className="btn btn-primary mx-auto">
+                                    {isLogin ? t('auth.login') : t('auth.register')}
+                                </button>
+                            )
+                        }
                     </div>
                 </form>
 
