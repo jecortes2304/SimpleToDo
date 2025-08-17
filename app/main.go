@@ -4,6 +4,7 @@ import (
 	embedfs "SimpleToDo"
 	"SimpleToDo/config"
 	"SimpleToDo/db"
+	"SimpleToDo/docs"
 	_ "SimpleToDo/docs"
 	"SimpleToDo/router"
 	"SimpleToDo/util"
@@ -14,6 +15,7 @@ import (
 	_ "github.com/swaggo/echo-swagger"
 	echoSwagger "github.com/swaggo/echo-swagger"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"runtime"
@@ -121,6 +123,14 @@ func main() {
 
 	env := config.GetAppEnv()
 	applyMiddlewares(e, &env.ShowLogs, &env.CorsOrigin)
+
+	if u, err := url.Parse(env.BaseURL); err == nil && u.Scheme != "" && u.Host != "" {
+		docs.SwaggerInfo.Host = u.Host
+		docs.SwaggerInfo.Schemes = []string{u.Scheme}
+	} else {
+		docs.SwaggerInfo.Host = fmt.Sprintf("%s:%d", env.Host, env.Port)
+		docs.SwaggerInfo.Schemes = []string{env.Scheme}
+	}
 
 	errDb, DB := db.InitDB()
 	if errDb != nil {
