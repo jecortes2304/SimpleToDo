@@ -1,11 +1,39 @@
+version: '3.9'
+
 services:
   app:
     build: .
     container_name: simpletodo
     ports:
       - "8000:8000"
-    env_file:
-      - .env
+    environment:
+      # 🔐 Auth / JWT
+      JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret}
+
+      # ⚙️ App Config
+      SIMPLETODO_HOME: ${SIMPLETODO_HOME:-/data}
+      HOST: ${HOST:-0.0.0.0}
+      SCHEME: ${SCHEME:-http}
+      PORT: ${PORT:-8000}
+      BASE_URL: ${BASE_URL:-http://localhost:8000}
+      OPEN_BROWSER: ${OPEN_BROWSER:-false}
+      SHOW_LOGS: ${SHOW_LOGS:-true}
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+
+      # 📧 SMTP Config
+      SMTP_HOST: ${SMTP_HOST:-smtp.example.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USER: ${SMTP_USER:-noreply@example.com}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-changeme_password}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-noreply@example.com}
+
+      # 👤 Root User (admin)
+      ROOT_FIRSTNAME: ${ROOT_FIRSTNAME:-Admin}
+      ROOT_LASTNAME: ${ROOT_LASTNAME:-User}
+      ROOT_PHONE: ${ROOT_PHONE:-000000000}
+      ROOT_EMAIL: ${ROOT_EMAIL:-admin@example.com}
+      ROOT_USERNAME: ${ROOT_USERNAME:-admin}
+      ROOT_PASSWORD: ${ROOT_PASSWORD:-changeme_password}
     volumes:
       - ./data:/data
     restart: unless-stopped
