@@ -2,10 +2,10 @@ import React, {FormEvent, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAlert} from '../hooks/useAlert'
 import {useNavigate} from 'react-router-dom'
-import {GenderType, RegisterDto, TokenResponse} from "../schemas/auth.ts";
+import {GenderType, RegisterDto} from "../schemas/auth.ts";
 import {ApiResponse, ThemeColor} from "../schemas/globals.ts";
 import "react-day-picker/style.css";
-import {login, register} from "../services/AuthService.ts";
+import {CurrentUserMe, getCurrentUser, login, register} from "../services/AuthService.ts";
 import {
     CalendarIcon,
     EnvelopeIcon,
@@ -16,11 +16,13 @@ import {
     UserIcon
 } from "@heroicons/react/16/solid";
 import {DayPicker, MonthsDropdown, YearsDropdown} from "react-day-picker";
+import useAuthStore from '../store/authStore';
 
 const AuthPage: React.FC = () => {
     const {t} = useTranslation()
     const alert = useAlert()
     const navigate = useNavigate()
+    const {setAuth} = useAuthStore()
 
     const [isLogin, setIsLogin] = useState(true)
     const [email, setEmail] = useState('')
@@ -40,11 +42,16 @@ const AuthPage: React.FC = () => {
 
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            navigate('/', {replace: true});
-        }
-    }, []);
+        // If the user is already authenticated, redirect to home
+        (async () => {
+            const res = await getCurrentUser()
+            if (res.ok && res.result) {
+                const {id, email, role} = res.result as CurrentUserMe
+                setAuth({id, email, role})
+                navigate('/', {replace: true})
+            }
+        })()
+    }, [])
 
 
     const toggleMode = () => setIsLogin(!isLogin)
@@ -69,6 +76,7 @@ const AuthPage: React.FC = () => {
 
         if (!email || !password || (!isLogin && !username)) {
             alert(t('auth.fieldsRequired'), 'alert-error')
+            setIsLoading(false)
             return
         }
 
@@ -76,8 +84,12 @@ const AuthPage: React.FC = () => {
             const response = await login({email, password})
             if (response.ok && response.statusCode === 200) {
                 setIsLoading(false);
-                const tokenResponse = response.result as TokenResponse
-                localStorage.setItem('token', tokenResponse.token || '')
+                // After login, fetch current user info
+                const me = await getCurrentUser()
+                if (me.ok && me.result) {
+                    const {id, email: userEmail, role} = me.result as CurrentUserMe
+                    setAuth({id, email: userEmail, role})
+                }
                 alert(t('auth.loginSuccess'), 'alert-success')
                 navigate('/', {replace: true})
             } else {
@@ -87,6 +99,7 @@ const AuthPage: React.FC = () => {
             const age = date ? new Date().getFullYear() - date.getFullYear() : 0
             if (age < 16 || age > 120) {
                 alert(t('auth.ageRestriction'), 'alert-error')
+                setIsLoading(false)
                 return
             }
 

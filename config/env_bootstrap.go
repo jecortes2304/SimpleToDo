@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 const EnvFileName = ".env"
@@ -30,6 +31,13 @@ type envField struct {
 	Validate  func(string) error
 	Normalize func(string) string
 }
+
+type DBClientEnum string
+
+const (
+	PostgreSQL DBClientEnum = "postgresql"
+	SQLite     DBClientEnum = "sqlite"
+)
 
 type AppEnv struct {
 	JWTSecret     string
@@ -51,6 +59,14 @@ type AppEnv struct {
 	RootEmail     string
 	RootUsername  string
 	RootPassword  string
+	DbClient      string
+	DbHost        string
+	DbPort        int
+	DbUser        string
+	DbPassword    string
+	DbName        string
+	DbSSL         bool
+	Timezone      string
 }
 
 var (
@@ -60,6 +76,26 @@ var (
 	rePhone    = regexp.MustCompile(`^[0-9+\-().\s]{6,}$`)
 	reUsername = regexp.MustCompile(`^[a-zA-Z0-9._-]{3,}$`)
 )
+
+func validateDbClient(v string) error {
+	x := strings.ToLower(strings.TrimSpace(v))
+	if x != string(PostgreSQL) && x != string(SQLite) {
+		return errors.New("DB_CLIENT must be postgresql or sqlite")
+	}
+	return nil
+}
+
+func validateTimezone(v string) error {
+	v = strings.TrimSpace(v)
+	if v == "" {
+		return nil
+	}
+	_, err := time.LoadLocation(v)
+	if err != nil {
+		return errors.New("invalid TIMEZONE")
+	}
+	return nil
+}
 
 func validateScheme(v string) error {
 	x := strings.ToLower(strings.TrimSpace(v))
@@ -185,8 +221,76 @@ func validatePassword(v string) error {
 	return nil
 }
 
+func envPath() (string, error) {
+	dir, err := AppDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(dir, EnvFileName), nil
+}
+
+func escapeEnv(v string) string {
+	if strings.ContainsAny(v, " #=") {
+		return strconv.Quote(v)
+	}
+	return v
+}
+
+func parseBoolWithDefault(s string, d bool) bool {
+	if strings.EqualFold(strings.TrimSpace(s), "true") {
+		return true
+	}
+	if strings.EqualFold(strings.TrimSpace(s), "false") {
+		return false
+	}
+	return d
+}
+
+func splitCSV(s string) []string {
+	var out []string
+	for _, p := range strings.Split(s, ",") {
+		p = strings.TrimSpace(p)
+		if p != "" {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func normalizeCSV(s string) string {
+	return strings.Join(splitCSV(s), ",")
+}
+
+func fallback(s, def string) string {
+	if strings.TrimSpace(s) == "" {
+		return def
+	}
+	return s
+}
+
+func mustGenerateJWTSecret() string {
+	buf := make([]byte, 32)
+	if _, err := rand.Read(buf); err != nil {
+		return "ChangeMePlease_UseAStrongSecret123!"
+	}
+	return base64.RawURLEncoding.EncodeToString(buf)
+}
+
+func atoiDefault(s string, def int) (int, error) {
+	if strings.TrimSpace(s) == "" {
+		return def, nil
+	}
+	return strconv.Atoi(s)
+}
+
+func fileExists(p string) bool {
+	_, err := os.Stat(p)
+	return err == nil
+}
+
 func AppDir() (string, error) {
-	if v := strings.TrimSpace(os.Getenv("SIMPLETODO_HOME")); v != "" {
+	simpleTodoHome := os.Getenv("SIMPLETODO_HOME")
+	if v := strings.TrimSpace(simpleTodoHome); v != "" {
 		return v, nil
 	}
 	home, err := os.UserHomeDir()
@@ -196,20 +300,20 @@ func AppDir() (string, error) {
 	return filepath.Join(home, "SimpleToDo"), nil
 }
 
-func EnvPath() (string, error) {
-	dir, err := AppDir()
-	if err != nil {
-		return "", err
+func GetDbClient() (string, error) {
+	env := GetAppEnv()
+	if env.DbClient != "" {
+		return env.DbClient, nil
 	}
-	return filepath.Join(dir, EnvFileName), nil
+	return "sqlite", nil
 }
 
 func EnsureEnvInteractive() error {
-	envPath, err := EnvPath()
+	envPath, err := envPath()
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll(filepath.Dir(envPath), 0o700); err != nil {
+	if err = os.MkdirAll(filepath.Dir(envPath), 0o700); err != nil {
 		return err
 	}
 
@@ -254,6 +358,20 @@ func EnsureEnvInteractive() error {
 			}
 			return validatePassword(s)
 		}},
+		{Key: "DB_CLIENT", Prompt: "Database client (postgresql|sqlite)", Default: "sqlite", Validate: validateDbClient, Normalize: strings.ToLower},
+	}
+
+	// Add DB fields if PostgreSQL is selected
+	if dbClient := os.Getenv("DB_CLIENT"); strings.ToLower(strings.TrimSpace(dbClient)) == "postgresql" {
+		fields = append(fields,
+			envField{Key: "DB_HOST", Prompt: "Database host", Default: "localhost", Validate: validateHost},
+			envField{Key: "DB_PORT", Prompt: "Database port", Default: "5432", Validate: validatePort},
+			envField{Key: "DB_USER", Prompt: "Database user", Default: "postgres", Validate: validateNonEmpty},
+			envField{Key: "DB_PASSWORD", Prompt: "Database password", Default: "", Optional: true, Secret: true, Validate: func(s string) error { return nil }},
+			envField{Key: "DB_NAME", Prompt: "Database name", Default: "simpletodo", Validate: validateNonEmpty},
+			envField{Key: "DB_SSL", Prompt: "Database SSL (true/false)", Default: "false", Validate: validateBool},
+			envField{Key: "TIMEZONE", Prompt: "Timezone (e.g., UTC, leave empty for system default)", Default: "", Optional: true, Validate: validateTimezone},
+		)
 	}
 
 	// If .env exists, validate and return
@@ -380,7 +498,7 @@ func EnsureEnvInteractive() error {
 }
 
 func LoadEnvFromAppDir() error {
-	envPath, err := EnvPath()
+	envPath, err := envPath()
 	if err != nil {
 		return err
 	}
@@ -418,6 +536,8 @@ func LoadEnvFromAppDir() error {
 		jwt = mustGenerateJWTSecret()
 	}
 
+	dbPort, err := atoiDefault(os.Getenv("DB_PORT"), 5432)
+
 	Env = AppEnv{
 		JWTSecret:     jwt,
 		Scheme:        scheme,
@@ -438,69 +558,31 @@ func LoadEnvFromAppDir() error {
 		RootEmail:     fallback(os.Getenv("ROOT_EMAIL"), "admin@example.com"),
 		RootUsername:  fallback(os.Getenv("ROOT_USERNAME"), "admin"),
 		RootPassword:  fallback(os.Getenv("ROOT_PASSWORD"), "ChangeMe123!"),
+		DbClient:      fallback(os.Getenv("DB_CLIENT"), "sqlite"),
+		DbHost:        fallback(os.Getenv("DB_HOST"), "localhost"),
+		DbPort:        dbPort,
+		DbUser:        fallback(os.Getenv("DB_USER"), "postgres"),
+		DbPassword:    fallback(os.Getenv("DB_PASSWORD"), "postgres"),
+		DbName:        fallback(os.Getenv("DB_NAME"), "simpletodo_db"),
+		DbSSL:         parseBoolWithDefault(os.Getenv("DB_SSL"), false),
+		Timezone:      fallback(os.Getenv("TIMEZONE"), "UTC"),
 	}
 	return nil
-}
-
-func escapeEnv(v string) string {
-	if strings.ContainsAny(v, " #=") {
-		return strconv.Quote(v)
-	}
-	return v
 }
 
 func GetAppEnv() *AppEnv {
 	return &Env
 }
 
-func parseBoolWithDefault(s string, d bool) bool {
-	if strings.EqualFold(strings.TrimSpace(s), "true") {
-		return true
-	}
-	if strings.EqualFold(strings.TrimSpace(s), "false") {
-		return false
-	}
-	return d
-}
-
-func splitCSV(s string) []string {
-	var out []string
-	for _, p := range strings.Split(s, ",") {
-		p = strings.TrimSpace(p)
-		if p != "" {
-			out = append(out, p)
+func GetPostgresDBConnectionString() string {
+	env := GetAppEnv()
+	if env.DbClient == string(PostgreSQL) {
+		sslMode := "disable"
+		if env.DbSSL {
+			sslMode = "enable"
 		}
+		return fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%d sslmode=%s TimeZone=%s",
+			env.DbHost, env.DbUser, env.DbPassword, env.DbName, env.DbPort, sslMode, env.Timezone)
 	}
-	return out
-}
-
-func normalizeCSV(s string) string {
-	return strings.Join(splitCSV(s), ",")
-}
-
-func fallback(s, def string) string {
-	if strings.TrimSpace(s) == "" {
-		return def
-	}
-	return s
-}
-
-func mustGenerateJWTSecret() string {
-	buf := make([]byte, 32)
-	if _, err := rand.Read(buf); err != nil {
-		return "ChangeMePlease_UseAStrongSecret123!"
-	}
-	return base64.RawURLEncoding.EncodeToString(buf)
-}
-
-func atoiDefault(s string, def int) (int, error) {
-	if strings.TrimSpace(s) == "" {
-		return def, nil
-	}
-	return strconv.Atoi(s)
-}
-
-func fileExists(p string) bool {
-	_, err := os.Stat(p)
-	return err == nil
+	return ""
 }

@@ -142,7 +142,7 @@ func UserRouters(db *gorm.DB, v1 *echo.Group) {
 
 	usersGroup := v1.Group("/users")
 	usersGroup.Use(middleware.JWTMiddleware)
-	usersGroup.Use(middleware.AdminOnly)
+	usersGroup.Use(middleware.AdminOnlyMIddleware)
 
 	userProfileGroup := v1.Group("/profile")
 	userProfileGroup.Use(middleware.JWTMiddleware)

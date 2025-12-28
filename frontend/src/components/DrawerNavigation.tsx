@@ -5,13 +5,13 @@ import {Outlet} from "react-router-dom";
 import {AlertManager} from "./AlertManager";
 import {ClipboardIcon, FolderIcon, HomeIcon} from "@heroicons/react/24/solid";
 import {UsersIcon} from "@heroicons/react/16/solid";
+import useAuthStore from "../store/authStore.ts";
 
 function getRoleFromToken(): number | null {
-    const t = localStorage.getItem('token');
-    if (!t) return null;
+    const {user} = useAuthStore();
+    if (!user) return null;
     try {
-        const payload = JSON.parse(atob(t.split('.')[1]));
-        return typeof payload.role === 'number' ? payload.role : null;
+        return user.role
     } catch {
         return null;
     }

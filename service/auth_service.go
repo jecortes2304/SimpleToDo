@@ -198,3 +198,21 @@ func (s *AuthService) VerifyEmail(tokenPlain string) error {
 	}
 	return s.AuthRepository.MarkEmailVerificationTokenUsed(t.ID)
 }
+
+// Example cookie handlers using Echo framework
+//func writeCookie(c echo.Context) error {
+//	cookie := new(http.Cookie)
+//	cookie.Name = "username"
+//	cookie.Value = "jon"
+//	cookie.Expires = time.Now().Add(24 * time.Hour)
+//	c.SetCookie(cookie)
+//	return c.String(http.StatusOK, "write a cookie")
+//}
+//
+//func readCookie(c echo.Context) error {
+//	cookie, err := c.Cookie("username")
+//	if err != nil {
+//		return err
+//	}
+//	return c.String(http.StatusOK, "read a cookie")
+//}
