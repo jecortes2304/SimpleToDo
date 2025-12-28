@@ -270,7 +270,7 @@ paths:
     post:
       consumes:
       - application/json
-      description: Authenticate a user and return a JWT
+      description: Authenticate a user and set a JWT in HTTP-only cookie
       parameters:
       - description: Login payload
         in: body
@@ -298,7 +298,7 @@ paths:
       - Auth
   /auth/logout:
     delete:
-      description: Invalidate user session on the client
+      description: Invalidate user session by clearing auth cookie
       produces:
       - application/json
       responses:
@@ -306,9 +306,24 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.StandardResponseOk'
-      security:
-      - BearerAuth: []
       summary: Logout
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      description: Returns basic info from the JWT claims
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Get current authenticated user
       tags:
       - Auth
   /auth/register:

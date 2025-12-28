@@ -66,7 +66,7 @@ const docTemplate = `{
         },
         "/auth/login": {
             "post": {
-                "description": "Authenticate a user and return a JWT",
+                "description": "Authenticate a user and set a JWT in HTTP-only cookie",
                 "consumes": [
                     "application/json"
                 ],
@@ -112,12 +112,7 @@ const docTemplate = `{
         },
         "/auth/logout": {
             "delete": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Invalidate user session on the client",
+                "description": "Invalidate user session by clearing auth cookie",
                 "produces": [
                     "application/json"
                 ],
@@ -130,6 +125,32 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseOk"
+                        }
+                    }
+                }
+            }
+        },
+        "/auth/me": {
+            "get": {
+                "description": "Returns basic info from the JWT claims",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Get current authenticated user",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseOk"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
                         }
                     }
                 }
