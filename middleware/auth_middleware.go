@@ -4,24 +4,21 @@ import (
 	"SimpleToDo/config"
 	"SimpleToDo/dto/response"
 	"net/http"
-	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
 )
 
+const AuthCookieName = "auth_token"
+
 func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		authHeader := c.Request().Header.Get("Authorization")
-		if authHeader == "" {
-			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Missing token", "", true)
+		cookie, err := c.Cookie(AuthCookieName)
+		if err != nil || cookie == nil || cookie.Value == "" {
+			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Missing auth cookie", "", true)
 		}
 
-		if !strings.HasPrefix(strings.ToLower(authHeader), "bearer ") {
-			authHeader = "Bearer " + authHeader
-		}
-
-		tokenStr := strings.TrimSpace(authHeader[len("Bearer "):])
+		tokenStr := cookie.Value
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 			secret := config.GetAppEnv().JWTSecret
 			if secret == "" {
@@ -46,7 +43,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
-func AdminOnly(next echo.HandlerFunc) echo.HandlerFunc {
+func AdminOnlyMIddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
 		role, ok := c.Get("user_role").(float64)
 		if !ok || role != 1 {

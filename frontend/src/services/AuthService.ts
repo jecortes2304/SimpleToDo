@@ -2,15 +2,21 @@ import {apiClient} from './apiClient'
 import {AxiosResponse} from 'axios'
 import {ApiResponse} from '../schemas/globals.ts'
 import {handleApiError, handleApiResponse} from '../utils/apiUtils.ts'
-import {LoginDto, RegisterDto, TokenResponse, User} from '../schemas/auth.ts'
+import {LoginDto, RegisterDto, User} from '../schemas/auth.ts'
 
-export async function login(data: LoginDto): Promise<ApiResponse<TokenResponse>> {
+export interface CurrentUserMe {
+    id: number
+    email: string
+    role: number
+}
+
+export async function login(data: LoginDto): Promise<ApiResponse<null>> {
     try {
-        const res: AxiosResponse<ApiResponse<TokenResponse>> = await apiClient.post('/auth/login', data).then()
-        return handleApiResponse<TokenResponse>(res)
+        const res: AxiosResponse<ApiResponse<null>> = await apiClient.post('/auth/login', data)
+        return handleApiResponse<null>(res)
     } catch (error) {
         console.error('Error logging in:', error)
-        return handleApiError<TokenResponse>(error as AxiosResponse<ApiResponse<TokenResponse>>)
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
 }
 
@@ -39,7 +45,7 @@ export async function verifyEmail(token: string): Promise<ApiResponse<null>> {
         const res: AxiosResponse<ApiResponse<null>> = await apiClient.post(`/auth/verify-email?token=${token}`)
         return handleApiResponse<null>(res)
     } catch (error) {
-        console.error('Error logging out:', error)
+        console.error('Error verifying email:', error)
         return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
 }
@@ -51,7 +57,6 @@ export async function resendVerification(email: string): Promise<ApiResponse<nul
     } catch (error) {
         return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
-
 }
 
 export async function resetPassword(token: string, newPassword: string): Promise<ApiResponse<null>> {
@@ -59,19 +64,27 @@ export async function resetPassword(token: string, newPassword: string): Promise
         const res: AxiosResponse<ApiResponse<null>> = await apiClient.post(`/auth/reset`, {
             token,
             newPassword
-        });
-        return handleApiResponse<null>(res);
+        })
+        return handleApiResponse<null>(res)
     } catch (error) {
-        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>);
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
 }
 
 export async function forgotPassword(email: string): Promise<ApiResponse<null>> {
     try {
-        const res = await apiClient.post('/auth/forgot', { email });
-        return handleApiResponse<null>(res);
+        const res = await apiClient.post('/auth/forgot', { email })
+        return handleApiResponse<null>(res)
     } catch (error) {
-        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>);
+        return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
     }
 }
 
+export async function getCurrentUser(): Promise<ApiResponse<CurrentUserMe>> {
+    try {
+        const res: AxiosResponse<ApiResponse<CurrentUserMe>> = await apiClient.get('/auth/me')
+        return handleApiResponse<CurrentUserMe>(res)
+    } catch (error) {
+        return handleApiError<CurrentUserMe>(error as AxiosResponse<ApiResponse<CurrentUserMe>>)
+    }
+}

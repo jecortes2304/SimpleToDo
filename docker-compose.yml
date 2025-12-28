@@ -5,7 +5,7 @@ services:
     build: .
     container_name: simpletodo
     ports:
-      - "8000:8000"
+      - "${PORT:-8000}:${PORT:-8000}"
     environment:
       # 🔐 Auth / JWT
       JWT_SECRET: ${JWT_SECRET:-changeme_jwt_secret}
@@ -34,6 +34,16 @@ services:
       ROOT_EMAIL: ${ROOT_EMAIL:-admin@example.com}
       ROOT_USERNAME: ${ROOT_USERNAME:-admin}
       ROOT_PASSWORD: ${ROOT_PASSWORD:-changeme_password}
+
+      # 🗄️ Database Config
+      DB_CLIENT: ${DB_CLIENT:-sqlite}
+      DB_HOST: ${DB_HOST:-localhost}
+      DB_PORT: ${DB_PORT:-5432}
+      DB_USER: ${DB_USER:-simpletodo_user}
+      DB_PASSWORD: ${DB_PASSWORD:-changeme_db_password}
+      DB_NAME: ${DB_NAME:-simpletodo_db}
+      DB_SSL: ${DB_SSL:-false}
+      DB_TMEZONE: ${DB_TMEZONE:-UTC}
     volumes:
       - ./data:/data
     restart: unless-stopped

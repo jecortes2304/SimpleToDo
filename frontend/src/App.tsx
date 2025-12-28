@@ -16,8 +16,11 @@ import VerificationEmailPendingPage from "./pages/VerificationEmailPendingPage.t
 import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import {AdminRoute} from "./utils/AdminRoute.tsx";
+import {useBootstrapAuth} from './hooks/useBootstrapAuth';
 
 function App() {
+
+    useBootstrapAuth();
 
     return (
         <div className="min-h-screen flex flex-col">

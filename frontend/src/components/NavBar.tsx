@@ -9,6 +9,7 @@ import {User} from '../schemas/user.ts';
 import {useTranslation} from "react-i18next";
 import {UserCircleIcon} from "@heroicons/react/16/solid";
 import useAppStore from "../store/appStore.ts";
+import useAuthStore from "../store/authStore.ts";
 
 const NavBar: React.FC = () => {
     const navigate = useNavigate();
@@ -16,13 +17,14 @@ const NavBar: React.FC = () => {
     const alert = useAlert();
     const [user, setUser] = useState<User | null>(null);
     const {avatarRefresh} = useAppStore()
+    const {clearAuth} = useAuthStore()
 
     const logoutCallback = async () => {
         const response = await logout();
         if (response.ok) {
+            clearAuth();
             alert('Logged out successfully', 'alert-success');
             setTimeout(() => {
-                localStorage.removeItem('token');
                 navigate('/auth', {replace: true});
             }, 500);
         } else {

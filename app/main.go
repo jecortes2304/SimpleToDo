@@ -29,11 +29,12 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string) {
 		e.Logger.SetLevel(log.OFF)
 	} else {
 		e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-			Format: "\033[36m[${time_rfc3339}]\033[0m \033[32m${method}\033[0m \033[34m${uri}\033[0m \033[33m${status}\033[0m ${latency_human}\n",
+			Format: "\u001B[32m${id} - \033[36m[${time_rfc3339}]\033[0m \033[32m${method}\033[0m \033[34m${uri}\033[0m \033[33m${status}\033[0m ${latency_human}\n",
 		}))
 	}
 
 	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: *corsOrigins,
 		AllowMethods: []string{
@@ -44,7 +45,6 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string) {
 		},
 		AllowCredentials: true,
 	}))
-
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
@@ -159,5 +159,5 @@ func main() {
 		}()
 	}
 
-	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", env.Port)))
+	e.Logger.Fatal(e.Start(fmt.Sprintf(":%d", env.Port)), e.Close())
 }

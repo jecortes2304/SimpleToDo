@@ -3,13 +3,16 @@ package v1
 import (
 	"SimpleToDo/dto/request"
 	"SimpleToDo/dto/response"
+	"SimpleToDo/middleware"
 	"SimpleToDo/models"
 	"SimpleToDo/repository"
 	"SimpleToDo/service"
+	"net/http"
+	"time"
+
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
-	"net/http"
 )
 
 type AuthController struct {
@@ -40,7 +43,20 @@ func (authController *AuthController) login(c echo.Context) error {
 		return response.WriteJSONResponse(c, http.StatusUnauthorized, "Login failed", err.Error(), true)
 	}
 
-	return response.WriteJSONResponse(c, http.StatusOK, "Login success", map[string]string{"token": token}, false)
+	// Set JWT in HTTP-only cookie
+	cookie := &http.Cookie{
+		Name:     middleware.AuthCookieName,
+		Value:    token,
+		Path:     "/",
+		HttpOnly: true,
+		// In dev mode, Secure should be false. In production, it should be true.
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		Expires:  time.Now().Add(72 * time.Hour),
+	}
+	c.SetCookie(cookie)
+
+	return response.WriteJSONResponse(c, http.StatusOK, "Login success", nil, false)
 }
 
 func (authController *AuthController) register(c echo.Context) error {
@@ -80,7 +96,17 @@ func (authController *AuthController) register(c echo.Context) error {
 }
 
 func (authController *AuthController) logout(c echo.Context) error {
-	// Logout client-side: this is usually token deletion/expiration in frontend or storage
+	// Invalidate cookie on server side
+	cookie := &http.Cookie{
+		Name:     middleware.AuthCookieName,
+		Value:    "",
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   false,
+		SameSite: http.SameSiteLaxMode,
+		MaxAge:   -1,
+	}
+	c.SetCookie(cookie)
 	return response.WriteJSONResponse(c, http.StatusOK, "Logged out", "OK", false)
 }
 
@@ -167,7 +193,7 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	authGroup := v1.Group("/auth")
 
 	// @Summary Login
-	// @Description Authenticate a user and return a JWT
+	// @Description Authenticate a user and set a JWT in HTTP-only cookie
 	// @Tags Auth
 	// @Accept json
 	// @Produce json
@@ -191,9 +217,8 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	authGroup.POST("/register", authController.register)
 
 	// @Summary Logout
-	// @Description Invalidate user session on the client
+	// @Description Invalidate user session by clearing auth cookie
 	// @Tags Auth
-	// @Security BearerAuth
 	// @Produce json
 	// @Success 200 {object} response.StandardResponseOk
 	// @Router /auth/logout [delete]
@@ -244,4 +269,27 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Router /auth/resend-verification [post]
 	authGroup.POST("/resend-verification", authController.resendVerificationEmail)
 
+	// Protected route to get current authenticated user info
+	authProtected := authGroup.Group("")
+	authProtected.Use(middleware.JWTMiddleware)
+
+	// @Summary Get current authenticated user
+	// @Description Returns basic info from the JWT claims
+	// @Tags Auth
+	// @Produce json
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /auth/me [get]
+	authProtected.GET("/me", func(c echo.Context) error {
+		userID := c.Get("user_id")
+		userEmail := c.Get("user_email")
+		userRole := c.Get("user_role")
+
+		data := map[string]interface{}{
+			"id":    userID,
+			"email": userEmail,
+			"role":  userRole,
+		}
+		return response.WriteJSONResponse(c, http.StatusOK, "Current user", data, false)
+	})
 }

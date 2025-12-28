@@ -32,15 +32,14 @@ func (r *AuthRepository) FindByEmail(email string) *models.User {
 
 func (r *AuthRepository) FindIfUserIsVerified(email string) *models.User {
 	var user models.User
-	if err := r.Db.Where("email = ? AND verified = 1", email).First(&user).Error; err != nil {
+	if err := r.Db.Where("email = ? AND verified = ?", email, true).First(&user).Error; err != nil {
 		return nil
 	}
 	return &user
 }
 
 func (r *AuthRepository) CreatePasswordResetToken(userID uint, tokenPlain string, ttl time.Duration) (*models.PasswordResetToken, error) {
-	sum := sha256.Sum256([]byte(tokenPlain))
-	hash := hex.EncodeToString(sum[:])
+	hash, _ := getPasswordHash(tokenPlain)
 
 	// invalidate previous active tokens for user
 	_ = r.Db.Model(&models.PasswordResetToken{}).
@@ -83,8 +82,7 @@ func (r *AuthRepository) UpdateUserPassword(userID uint, newPlain string) error 
 }
 
 func (r *AuthRepository) CreateEmailVerificationToken(userID uint, tokenPlain string, ttl time.Duration) (*models.EmailVerificationToken, error) {
-	sum := sha256.Sum256([]byte(tokenPlain))
-	hash := hex.EncodeToString(sum[:])
+	hash, _ := getPasswordHash(tokenPlain)
 
 	// invalidate old tokens
 	_ = r.Db.Model(&models.EmailVerificationToken{}).
@@ -104,8 +102,7 @@ func (r *AuthRepository) CreateEmailVerificationToken(userID uint, tokenPlain st
 }
 
 func (r *AuthRepository) GetEmailVerificationToken(tokenPlain string) (*models.EmailVerificationToken, error) {
-	sum := sha256.Sum256([]byte(tokenPlain))
-	hash := hex.EncodeToString(sum[:])
+	hash, _ := getPasswordHash(tokenPlain)
 
 	var t models.EmailVerificationToken
 	if err := r.Db.Where("token_hash = ?", hash).First(&t).Error; err != nil {
@@ -120,4 +117,10 @@ func (r *AuthRepository) MarkEmailVerificationTokenUsed(id uint) error {
 
 func (r *AuthRepository) MarkUserVerified(userID uint) error {
 	return r.Db.Model(&models.User{}).Where("id = ?", userID).Update("verified", true).Error
+}
+
+func getPasswordHash(tokenPlain string) (string, error) {
+	sum := sha256.Sum256([]byte(tokenPlain))
+	hash := hex.EncodeToString(sum[:])
+	return hash, nil
 }
