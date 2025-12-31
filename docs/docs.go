@@ -26,6 +26,11 @@ const docTemplate = `{
     "paths": {
         "/auth/forgot": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Send password reset email if account exists",
                 "consumes": [
                     "application/json"
@@ -57,6 +62,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseError"
                         }
@@ -100,18 +111,17 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseError"
                         }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "$ref": "#/definitions/response.StandardResponseError"
-                        }
                     }
                 }
             }
         },
         "/auth/logout": {
             "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Invalidate user session by clearing auth cookie",
                 "produces": [
                     "application/json"
@@ -126,12 +136,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseOk"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
                     }
                 }
             }
         },
         "/auth/me": {
             "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Returns basic info from the JWT claims",
                 "produces": [
                     "application/json"
@@ -193,6 +214,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.StandardResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
+                    },
                     "409": {
                         "description": "Conflict",
                         "schema": {
@@ -204,6 +231,11 @@ const docTemplate = `{
         },
         "/auth/resend-verification": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Resend email verification link if the user is not verified",
                 "consumes": [
                     "application/json"
@@ -239,6 +271,12 @@ const docTemplate = `{
                             "$ref": "#/definitions/response.StandardResponseError"
                         }
                     },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
+                    },
                     "404": {
                         "description": "Not Found",
                         "schema": {
@@ -250,6 +288,11 @@ const docTemplate = `{
         },
         "/auth/reset": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Reset password using a one-time token sent by email",
                 "consumes": [
                     "application/json"
@@ -284,12 +327,23 @@ const docTemplate = `{
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseError"
                         }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
                     }
                 }
             }
         },
         "/auth/verify-email": {
             "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
                 "description": "Verify user email using a token sent after registration",
                 "consumes": [
                     "application/json"
@@ -319,6 +373,12 @@ const docTemplate = `{
                     },
                     "400": {
                         "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.StandardResponseError"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
                         "schema": {
                             "$ref": "#/definitions/response.StandardResponseError"
                         }

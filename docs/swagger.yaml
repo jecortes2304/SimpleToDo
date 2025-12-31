@@ -263,6 +263,12 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Forgot password
       tags:
       - Auth
@@ -289,10 +295,6 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.StandardResponseError'
-        "401":
-          description: Unauthorized
-          schema:
-            $ref: '#/definitions/response.StandardResponseError'
       summary: Login
       tags:
       - Auth
@@ -306,6 +308,12 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/response.StandardResponseOk'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Logout
       tags:
       - Auth
@@ -323,6 +331,8 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Get current authenticated user
       tags:
       - Auth
@@ -347,6 +357,10 @@ paths:
             $ref: '#/definitions/response.StandardResponseOk'
         "400":
           description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
         "409":
@@ -379,10 +393,16 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
         "404":
           description: Not Found
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Resend verification email
       tags:
       - Auth
@@ -409,6 +429,12 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Reset password
       tags:
       - Auth
@@ -434,6 +460,12 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
       summary: Verify email
       tags:
       - Auth

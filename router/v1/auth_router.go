@@ -185,6 +185,19 @@ func (authController *AuthController) resendVerificationEmail(c echo.Context) er
 	return response.WriteJSONResponse(c, http.StatusOK, "Verification email resent if the account is not verified", nil, false)
 }
 
+func (authController *AuthController) getCurrentUser(c echo.Context) error {
+	userID := c.Get("user_id")
+	userEmail := c.Get("user_email")
+	userRole := c.Get("user_role")
+
+	data := map[string]interface{}{
+		"id":    userID,
+		"email": userEmail,
+		"role":  userRole,
+	}
+	return response.WriteJSONResponse(c, http.StatusOK, "Current user", data, false)
+}
+
 func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	authRepository := repository.NewAuthRepository(db)
 	authService := service.NewAuthService(authRepository)
@@ -200,7 +213,6 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Param payload body request.LoginRequest true "Login payload"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/login [post]
 	authGroup.POST("/login", authController.login)
 
@@ -212,84 +224,84 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Param payload body request.RegisterRequest true "Register payload"
 	// @Success 201 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Failure 409 {object} response.StandardResponseError
 	// @Router /auth/register [post]
 	authGroup.POST("/register", authController.register)
 
+	authProtected := authGroup.Group("")
+	authProtected.Use(middleware.JWTMiddleware)
+
 	// @Summary Logout
 	// @Description Invalidate user session by clearing auth cookie
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Produce json
 	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/logout [delete]
-	authGroup.DELETE("/logout", authController.logout)
+	authProtected.DELETE("/logout", authController.logout)
 
 	// @Summary Forgot password
 	// @Description Send password reset email if account exists
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Accept json
 	// @Produce json
 	// @Param payload body request.ForgotPasswordRequest true "Forgot password payload"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/forgot [post]
-	authGroup.POST("/forgot", authController.forgotPassword)
+	authProtected.POST("/forgot", authController.forgotPassword)
 
 	// @Summary Reset password
 	// @Description Reset password using a one-time token sent by email
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Accept json
 	// @Produce json
 	// @Param payload body request.ResetPasswordRequest true "Reset password payload"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/reset [post]
-	authGroup.POST("/reset", authController.resetPassword)
+	authProtected.POST("/reset", authController.resetPassword)
 
 	// @Summary Verify email
 	// @Description Verify user email using a token sent after registration
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Accept json
 	// @Produce json
 	// @Param token query string true "Email verification token"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/verify-email [post]
-	authGroup.POST("/verify-email", authController.verifyEmail)
+	authProtected.POST("/verify-email", authController.verifyEmail)
 
 	// @Summary Resend verification email
 	// @Description Resend email verification link if the user is not verified
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Accept json
 	// @Produce json
 	// @Param payload body request.ForgotPasswordRequest true "Resend verification payload (email)"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Failure 404 {object} response.StandardResponseError
 	// @Router /auth/resend-verification [post]
-	authGroup.POST("/resend-verification", authController.resendVerificationEmail)
-
-	// Protected route to get current authenticated user info
-	authProtected := authGroup.Group("")
-	authProtected.Use(middleware.JWTMiddleware)
+	authProtected.POST("/resend-verification", authController.resendVerificationEmail)
 
 	// @Summary Get current authenticated user
 	// @Description Returns basic info from the JWT claims
 	// @Tags Auth
+	// @Security BearerAuth
 	// @Produce json
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/me [get]
-	authProtected.GET("/me", func(c echo.Context) error {
-		userID := c.Get("user_id")
-		userEmail := c.Get("user_email")
-		userRole := c.Get("user_role")
-
-		data := map[string]interface{}{
-			"id":    userID,
-			"email": userEmail,
-			"role":  userRole,
-		}
-		return response.WriteJSONResponse(c, http.StatusOK, "Current user", data, false)
-	})
+	authProtected.GET("/me", authController.getCurrentUser)
 }
