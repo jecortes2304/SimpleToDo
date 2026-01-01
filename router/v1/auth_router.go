@@ -205,6 +205,9 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 
 	authGroup := v1.Group("/auth")
 
+	authProtectedGroup := authGroup.Group("")
+	authProtectedGroup.Use(middleware.JWTMiddleware)
+
 	// @Summary Login
 	// @Description Authenticate a user and set a JWT in HTTP-only cookie
 	// @Tags Auth
@@ -229,8 +232,54 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Router /auth/register [post]
 	authGroup.POST("/register", authController.register)
 
-	authProtected := authGroup.Group("")
-	authProtected.Use(middleware.JWTMiddleware)
+	// @Summary Forgot password
+	// @Description Send password reset email if account exists
+	// @Tags Auth
+	// @Accept json
+	// @Produce json
+	// @Param payload body request.ForgotPasswordRequest true "Forgot password payload"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /auth/forgot [post]
+	authGroup.POST("/forgot", authController.forgotPassword)
+
+	// @Summary Reset password
+	// @Description Reset password using a one-time token sent by email
+	// @Tags Auth
+	// @Accept json
+	// @Produce json
+	// @Param payload body request.ResetPasswordRequest true "Reset password payload"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /auth/reset [post]
+	authGroup.POST("/reset", authController.resetPassword)
+
+	// @Summary Verify email
+	// @Description Verify user email using a token sent after registration
+	// @Tags Auth
+	// @Accept json
+	// @Produce json
+	// @Param token query string true "Email verification token"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Router /auth/verify-email [post]
+	authGroup.POST("/verify-email", authController.verifyEmail)
+
+	// @Summary Resend verification email
+	// @Description Resend email verification link if the user is not verified
+	// @Tags Auth
+	// @Accept json
+	// @Produce json
+	// @Param payload body request.ForgotPasswordRequest true "Resend verification payload (email)"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 404 {object} response.StandardResponseError
+	// @Router /auth/resend-verification [post]
+	authGroup.POST("/resend-verification", authController.resendVerificationEmail)
 
 	// @Summary Logout
 	// @Description Invalidate user session by clearing auth cookie
@@ -240,60 +289,7 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/logout [delete]
-	authProtected.DELETE("/logout", authController.logout)
-
-	// @Summary Forgot password
-	// @Description Send password reset email if account exists
-	// @Tags Auth
-	// @Security BearerAuth
-	// @Accept json
-	// @Produce json
-	// @Param payload body request.ForgotPasswordRequest true "Forgot password payload"
-	// @Success 200 {object} response.StandardResponseOk
-	// @Failure 400 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
-	// @Router /auth/forgot [post]
-	authProtected.POST("/forgot", authController.forgotPassword)
-
-	// @Summary Reset password
-	// @Description Reset password using a one-time token sent by email
-	// @Tags Auth
-	// @Security BearerAuth
-	// @Accept json
-	// @Produce json
-	// @Param payload body request.ResetPasswordRequest true "Reset password payload"
-	// @Success 200 {object} response.StandardResponseOk
-	// @Failure 400 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
-	// @Router /auth/reset [post]
-	authProtected.POST("/reset", authController.resetPassword)
-
-	// @Summary Verify email
-	// @Description Verify user email using a token sent after registration
-	// @Tags Auth
-	// @Security BearerAuth
-	// @Accept json
-	// @Produce json
-	// @Param token query string true "Email verification token"
-	// @Success 200 {object} response.StandardResponseOk
-	// @Failure 400 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
-	// @Router /auth/verify-email [post]
-	authProtected.POST("/verify-email", authController.verifyEmail)
-
-	// @Summary Resend verification email
-	// @Description Resend email verification link if the user is not verified
-	// @Tags Auth
-	// @Security BearerAuth
-	// @Accept json
-	// @Produce json
-	// @Param payload body request.ForgotPasswordRequest true "Resend verification payload (email)"
-	// @Success 200 {object} response.StandardResponseOk
-	// @Failure 400 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
-	// @Failure 404 {object} response.StandardResponseError
-	// @Router /auth/resend-verification [post]
-	authProtected.POST("/resend-verification", authController.resendVerificationEmail)
+	authProtectedGroup.DELETE("/logout", authController.logout)
 
 	// @Summary Get current authenticated user
 	// @Description Returns basic info from the JWT claims
@@ -303,5 +299,5 @@ func AuthRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 401 {object} response.StandardResponseError
 	// @Router /auth/me [get]
-	authProtected.GET("/me", authController.getCurrentUser)
+	authProtectedGroup.GET("/me", authController.getCurrentUser)
 }

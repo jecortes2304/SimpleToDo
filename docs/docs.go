@@ -26,11 +26,6 @@ const docTemplate = `{
     "paths": {
         "/auth/forgot": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Send password reset email if account exists",
                 "consumes": [
                     "application/json"
@@ -231,11 +226,6 @@ const docTemplate = `{
         },
         "/auth/resend-verification": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Resend email verification link if the user is not verified",
                 "consumes": [
                     "application/json"
@@ -288,11 +278,6 @@ const docTemplate = `{
         },
         "/auth/reset": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Reset password using a one-time token sent by email",
                 "consumes": [
                     "application/json"
@@ -339,11 +324,6 @@ const docTemplate = `{
         },
         "/auth/verify-email": {
             "post": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
                 "description": "Verify user email using a token sent after registration",
                 "consumes": [
                     "application/json"

@@ -267,8 +267,6 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
-      security:
-      - BearerAuth: []
       summary: Forgot password
       tags:
       - Auth
@@ -401,8 +399,6 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.StandardResponseError'
-      security:
-      - BearerAuth: []
       summary: Resend verification email
       tags:
       - Auth
@@ -433,8 +429,6 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
-      security:
-      - BearerAuth: []
       summary: Reset password
       tags:
       - Auth
@@ -464,8 +458,6 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
-      security:
-      - BearerAuth: []
       summary: Verify email
       tags:
       - Auth
