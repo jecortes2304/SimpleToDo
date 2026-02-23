@@ -61,14 +61,24 @@ type User struct {
 	Verified   bool      `gorm:"default:false"`
 }
 
+type AIServerSettings struct {
+	ID        uint   `gorm:"primaryKey"`
+	BaseUrl   string `gorm:"not null"`
+	APIKey    string `gorm:"not null"`
+	Model     string `gorm:"not null;default:'gpt-4o'"`
+	UserID    uint   `gorm:"not null;index"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
 type EmailVerificationToken struct {
 	ID        uint `gorm:"primaryKey"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
-
-	UserID    uint   `gorm:"not null;index"`
-	TokenHash string `gorm:"size:64;not null;uniqueIndex"`
+	UserID    uint           `gorm:"not null;index"`
+	TokenHash string         `gorm:"size:64;not null;uniqueIndex"`
 	ExpiresAt time.Time
 	Used      bool `gorm:"not null;default:false"`
 }
@@ -78,11 +88,20 @@ type PasswordResetToken struct {
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	DeletedAt gorm.DeletedAt `gorm:"index"`
+	UserID    uint           `gorm:"not null;index"`
+	TokenHash string         `gorm:"size:64;not null;uniqueIndex"`
+	ExpiresAt time.Time      `gorm:"not null"`
+	Used      bool           `gorm:"not null;default:false"`
+}
 
-	UserID    uint      `gorm:"not null;index"`
-	TokenHash string    `gorm:"size:64;not null;uniqueIndex"`
-	ExpiresAt time.Time `gorm:"not null"`
-	Used      bool      `gorm:"not null;default:false"`
+type Prompt struct {
+	ID           uint           `gorm:"primaryKey"`
+	Title        string         `gorm:"uniqueIndex;not null;size:150"`
+	Description  string         `gorm:"type:text;not null"`
+	SystemPrompt string         `gorm:"type:text;not null"`
+	DeletedAt    gorm.DeletedAt `gorm:"index"`
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (u *User) BeforeCreate(*gorm.DB) (err error) {

@@ -2,10 +2,10 @@ import React, {FormEvent, useEffect, useState} from 'react'
 import {useTranslation} from 'react-i18next'
 import {useAlert} from '../hooks/useAlert'
 import {useNavigate} from 'react-router-dom'
-import {GenderType, RegisterDto} from "../schemas/auth.ts";
+import {CurrentUserMe, GenderType, RegisterDto} from "../schemas/auth.ts";
 import {ApiResponse, ThemeColor} from "../schemas/globals.ts";
 import "react-day-picker/style.css";
-import {CurrentUserMe, getCurrentUser, login, register} from "../services/AuthService.ts";
+import {getCurrentUser, login, register} from "../services/AuthService.ts";
 import {
     CalendarIcon,
     EnvelopeIcon,

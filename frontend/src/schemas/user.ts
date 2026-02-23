@@ -31,3 +31,15 @@ export interface UpdateUserRequestDto {
 }
 
 
+export interface AISettingsDto {
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+}
+
+export interface UpdateAISettingsDto {
+    baseUrl: string;
+    apiKey: string;
+    model: string;
+}
+

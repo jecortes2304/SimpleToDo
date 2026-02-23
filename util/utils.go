@@ -2,7 +2,10 @@ package util
 
 import (
 	"SimpleToDo"
+	"SimpleToDo/config"
 	"fmt"
+	"os"
+	"text/template"
 )
 
 func PrintBanner() {
@@ -11,5 +14,9 @@ func PrintBanner() {
 		fmt.Println("⚠️ Banner not found:", err)
 		return
 	}
-	fmt.Println(string(banner))
+	t := template.Must(template.New("banner").Parse(string(banner)))
+	err = t.Execute(os.Stdout, config.VersionInfo)
+	if err != nil {
+		_, _ = os.Stdout.WriteString("Error imprimiendo banner: " + err.Error() + "\n")
+	}
 }

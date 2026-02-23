@@ -2,13 +2,7 @@ import {apiClient} from './apiClient'
 import {AxiosResponse} from 'axios'
 import {ApiResponse} from '../schemas/globals.ts'
 import {handleApiError, handleApiResponse} from '../utils/apiUtils.ts'
-import {LoginDto, RegisterDto, User} from '../schemas/auth.ts'
-
-export interface CurrentUserMe {
-    id: number
-    email: string
-    role: number
-}
+import {CurrentUserMe, LoginDto, RegisterDto, User} from '../schemas/auth.ts'
 
 export async function login(data: LoginDto): Promise<ApiResponse<null>> {
     try {

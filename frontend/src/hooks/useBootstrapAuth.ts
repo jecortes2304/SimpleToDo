@@ -1,7 +1,8 @@
 import {useEffect} from 'react'
 import {useLocation} from 'react-router-dom'
-import {CurrentUserMe, getCurrentUser} from '../services/AuthService'
+import {getCurrentUser} from '../services/AuthService'
 import useAuthStore from '../store/authStore'
+import {CurrentUserMe} from "../schemas/auth.ts";
 
 export const useBootstrapAuth = () => {
     const { setAuth, setLoading } = useAuthStore()
