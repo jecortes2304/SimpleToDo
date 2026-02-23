@@ -67,6 +67,7 @@ type AppEnv struct {
 	DbName        string
 	DbSSL         bool
 	Timezone      string
+	Debug         bool
 }
 
 var (
@@ -566,6 +567,7 @@ func LoadEnvFromAppDir() error {
 		DbName:        fallback(os.Getenv("DB_NAME"), "simpletodo_db"),
 		DbSSL:         parseBoolWithDefault(os.Getenv("DB_SSL"), false),
 		Timezone:      fallback(os.Getenv("TIMEZONE"), "UTC"),
+		Debug:         fallback(os.Getenv("DEBUG"), "false") == "true",
 	}
 	return nil
 }

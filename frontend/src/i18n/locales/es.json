@@ -1,5 +1,9 @@
 {
   "welcome": "Bienvenido",
+  "common": {
+    "update": "Actualizar",
+    "create": "Crear"
+  },
   "dashboard": {
     "dashboard": "Tablero",
     "tasksPerProject": "Tareas por proyecto",
@@ -8,18 +12,47 @@
   "projects": {
     "projects": "Proyectos",
     "name": "Nombre",
+    "title": "Título",
     "search": "Buscar",
     "description": "Descripción",
     "createdAt": "Fecha de creación",
     "actions": "Acciones",
     "update": "Actualizar",
     "create": "Crear",
+    "titleHint": "Debe ser un título mayor que 5 caracteres y menor que 100",
+    "descriptionHint": "Debe ser una descripción mayor que 10 caracteres y menor que 300",
+    "descriptionPlaceholder": "Ingresa la descripción del proyecto",
+    "titlePlaceholder": "Ingresa el nombre del proyecto",
     "deleteSelected": "Eliminar seleccionados",
     "deletedMultiple": "Proyectos eliminados",
     "deleted": "Proyecto eliminado",
     "updated": "Proyecto actualizado",
     "created": "Proyecto creado",
     "updatedAt": "Fecha de actualización"
+  },
+  "prompts": {
+    "prompts": "Prompts",
+    "title": "Título",
+    "search": "Buscar",
+    "titleHint": "Debe ser un título mayor que 5 caracteres y menor que 100",
+    "descriptionHint": "Debe ser una descripción mayor que 10 caracteres y menor que 300",
+    "fieldsRequired": "Los campos son obligatorios",
+    "description": "Descripción",
+    "systemPrompt": "System Prompt",
+    "systemPromptShort": "Sys Prompt",
+    "titlePlaceholder": "Ingresa el título del prompt",
+    "descriptionPlaceholder": "Ingresa la descripción del prompt",
+    "systemPromptPlaceholder": "Ingresa las instrucciones del sistema",
+    "createdAt": "Fecha de creación",
+    "updateAt": "Fecha de actualización",
+    "actions": "Acciones",
+    "update": "Actualizar Prompt",
+    "create": "Crear Prompt",
+    "deleteSelected": "Eliminar seleccionados",
+    "deletedMultiple": "Prompts eliminados",
+    "deleted": "Prompt eliminado",
+    "updated": "Prompt actualizado",
+    "created": "Prompt creado"
   },
   "tasks": {
     "tasks": "Tareas",
@@ -99,17 +132,26 @@
   },
   "profile": {
     "title": "Perfil de Usuario",
+    "personalInfo": "Información Personal",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "email": "Correo",
     "phone": "Teléfono",
-    "uploadAvatar": "Actualizar imagen de perfil",
+    "uploadAvatar": "Actualizar imagen",
     "save": "Guardar cambios",
     "updated": "Perfil actualizado correctamente",
     "updateError": "Error al actualizar el perfil",
     "errorLoading": "Error al cargar el perfil",
     "logout": "Cerrar sesión",
-    "profile": "Perfil"
+    "profile": "Perfil",
+    "aiSettingsTitle": "Configuración de IA",
+    "aiSettingsDesc": "Configura tu proveedor de IA para usar las funciones de visión en la extensión web.",
+    "aiBaseUrl": "URL Base",
+    "aiApiKey": "API Key",
+    "aiModel": "Nombre del Modelo",
+    "saveAiSettings": "Guardar Configuración IA",
+    "aiSettingsUpdated": "Configuración de IA actualizada correctamente",
+    "aiSettingsError": "Error al actualizar la configuración de IA"
   },
   "users" : {
     "users": "Usuarios"
@@ -148,6 +190,4 @@
     "tokenMissing": "Token de restablecimiento faltante o inválido",
     "passwordMismatch": "Las contraseñas no coinciden"
   }
-
-
 }

@@ -23,7 +23,7 @@ import (
 	"time"
 )
 
-func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string) {
+func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string, debug *bool) {
 
 	if !*showLogs {
 		e.Logger.SetLevel(log.OFF)
@@ -32,19 +32,32 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string) {
 			Format: "\u001B[32m${id} - \033[36m[${time_rfc3339}]\033[0m \033[32m${method}\033[0m \033[34m${uri}\033[0m \033[33m${status}\033[0m ${latency_human}\n",
 		}))
 	}
-
-	e.Use(middleware.Recover())
-	e.Use(middleware.RequestID())
-	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins: *corsOrigins,
+	corsConfig := middleware.CORSConfig{
 		AllowMethods: []string{
 			echo.GET, echo.POST, echo.PUT, echo.PATCH, echo.DELETE, echo.OPTIONS,
 		},
 		AllowHeaders: []string{
-			"Content-Type", "Authorization",
+			echo.HeaderContentType, echo.HeaderAuthorization, "Application-Name", "Accept",
 		},
 		AllowCredentials: true,
-	}))
+	}
+
+	if *debug {
+		corsConfig.AllowOriginFunc = func(origin string) (bool, error) {
+			return true, nil
+		}
+		fmt.Println("🔓 CORS: Debug mode enabled - Allowing all origins with credentials")
+	} else {
+		if len(*corsOrigins) == 0 {
+			fmt.Println("⚠️ WARNING: No CORS origins defined in production!")
+		}
+		corsConfig.AllowOrigins = *corsOrigins
+	}
+
+	e.Use(middleware.CORSWithConfig(corsConfig))
+	e.Use(middleware.Recover())
+	e.Use(middleware.RequestID())
+
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
@@ -122,7 +135,7 @@ func main() {
 	util.PrintBanner()
 
 	env := config.GetAppEnv()
-	applyMiddlewares(e, &env.ShowLogs, &env.CorsOrigin)
+	applyMiddlewares(e, &env.ShowLogs, &env.CorsOrigin, &env.Debug)
 
 	if u, err := url.Parse(env.BaseURL); err == nil && u.Scheme != "" && u.Host != "" {
 		docs.SwaggerInfo.Host = u.Host

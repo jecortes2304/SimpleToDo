@@ -4,6 +4,7 @@ import (
 	"SimpleToDo/config"
 	"SimpleToDo/dto/response"
 	"net/http"
+	"strings"
 
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/labstack/echo/v4"
@@ -13,12 +14,27 @@ const AuthCookieName = "auth_token"
 
 func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(c echo.Context) error {
-		cookie, err := c.Cookie(AuthCookieName)
-		if err != nil || cookie == nil || cookie.Value == "" {
-			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Missing auth cookie", "", true)
+		var tokenStr string
+
+		authHeader := c.Request().Header.Get("Authorization")
+		if authHeader != "" {
+			headerParts := strings.Split(authHeader, " ")
+			if len(headerParts) == 2 && headerParts[0] == "Bearer" {
+				tokenStr = headerParts[1]
+			}
 		}
 
-		tokenStr := cookie.Value
+		if tokenStr == "" {
+			cookie, err := c.Cookie(AuthCookieName)
+			if err == nil && cookie != nil && cookie.Value != "" {
+				tokenStr = cookie.Value
+			}
+		}
+
+		if tokenStr == "" {
+			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Missing auth token", "", true)
+		}
+
 		token, err := jwt.Parse(tokenStr, func(t *jwt.Token) (interface{}, error) {
 			secret := config.GetAppEnv().JWTSecret
 			if secret == "" {
@@ -28,7 +44,7 @@ func JWTMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		})
 
 		if err != nil || !token.Valid {
-			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Invalid token", "", true)
+			return response.WriteJSONResponse(c, http.StatusUnauthorized, "Invalid or expired token", "", true)
 		}
 
 		claims, ok := token.Claims.(jwt.MapClaims)

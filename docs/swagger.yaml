@@ -1,5 +1,12 @@
 basePath: /api/v1
 definitions:
+  request.AnalyzeImageRequest:
+    properties:
+      imageBase64:
+        type: string
+    required:
+    - imageBase64
+    type: object
   request.CreateProjectRequestDto:
     properties:
       description:
@@ -16,6 +23,19 @@ definitions:
     required:
     - description
     - name
+    type: object
+  request.CreatePromptRequest:
+    properties:
+      description:
+        type: string
+      systemPrompt:
+        type: string
+      title:
+        maxLength: 150
+        type: string
+    required:
+    - systemPrompt
+    - title
     type: object
   request.CreateTaskRequestDto:
     properties:
@@ -123,6 +143,19 @@ definitions:
     - newPassword
     - token
     type: object
+  request.UpdateAISettingsRequest:
+    properties:
+      apiKey:
+        type: string
+      baseUrl:
+        type: string
+      model:
+        type: string
+    required:
+    - apiKey
+    - baseUrl
+    - model
+    type: object
   request.UpdateProjectRequestDto:
     properties:
       description:
@@ -139,6 +172,16 @@ definitions:
     required:
     - description
     - name
+    type: object
+  request.UpdatePromptRequest:
+    properties:
+      description:
+        type: string
+      systemPrompt:
+        type: string
+      title:
+        maxLength: 150
+        type: string
     type: object
   request.UpdateTaskRequestDto:
     properties:
@@ -473,6 +516,10 @@ paths:
           description: Unauthorized
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
       security:
       - BearerAuth: []
       summary: Get current user profile
@@ -511,6 +558,58 @@ paths:
       security:
       - BearerAuth: []
       summary: Update current user profile
+      tags:
+      - Profile
+  /profile/ai-settings:
+    get:
+      description: Get the current user's AI server configuration
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get AI Settings
+      tags:
+      - Profile
+    put:
+      description: Update the current user's AI server configuration
+      parameters:
+      - description: AI Settings payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateAISettingsRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update AI Settings
       tags:
       - Profile
   /projects:
@@ -716,6 +815,188 @@ paths:
       summary: List all projects for the current user
       tags:
       - Projects
+  /prompts:
+    get:
+      description: Retrieve a paginated list of all prompts (Admin only)
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOkPaginated'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get all prompts
+      tags:
+      - Prompts
+    post:
+      consumes:
+      - application/json
+      description: Create a new AI system prompt (Admin only)
+      parameters:
+      - description: Create Prompt payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreatePromptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create Prompt
+      tags:
+      - Prompts
+  /prompts/{id}:
+    delete:
+      description: Delete a specific prompt (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete Prompt
+      tags:
+      - Prompts
+    get:
+      description: Retrieve details of a specific prompt (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get Prompt by ID
+      tags:
+      - Prompts
+    put:
+      description: Update prompt details (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Prompt payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdatePromptRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update Prompt
+      tags:
+      - Prompts
   /tasks:
     delete:
       parameters:
@@ -997,6 +1278,10 @@ paths:
           description: Not Found
           schema:
             $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
       security:
       - BearerAuth: []
       summary: Delete user
@@ -1080,6 +1365,38 @@ paths:
       summary: Update user
       tags:
       - Users
+  /vision/analyze:
+    post:
+      consumes:
+      - application/json
+      description: Extract task details from image using AI with User settings
+      parameters:
+      - description: Base64 Image
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.AnalyzeImageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StandardResponseOk'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Analyze Image
+      tags:
+      - Vision
 schemes:
 - http
 securityDefinitions:

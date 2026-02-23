@@ -13,4 +13,6 @@ func InitRouters(e *echo.Echo, db *gorm.DB) {
 	v1.UserRouters(db, apiV1)
 	v1.TaskRouters(db, apiV1)
 	v1.ProjectRoutes(db, apiV1)
+	v1.PromptRouters(db, apiV1)
+	v1.VisionRouters(db, apiV1)
 }

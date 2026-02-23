@@ -77,23 +77,6 @@ func Seed(db *gorm.DB) {
 			}
 		}
 
-		var project models.Project
-		if err := tx.Where("id = ?", 1).First(&project).Error; err != nil {
-			if errors.Is(err, gorm.ErrRecordNotFound) {
-				project = models.Project{
-					ID:          1,
-					Name:        "Default Project",
-					Description: "Dummy project by default",
-					UserId:      root.ID,
-				}
-				if err := tx.Clauses(clause.OnConflict{DoNothing: true}).Create(&project).Error; err != nil {
-					return err
-				}
-			} else {
-				return err
-			}
-		}
-
 		return nil
 	})
 

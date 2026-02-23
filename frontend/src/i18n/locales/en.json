@@ -1,5 +1,9 @@
 {
   "welcome": "Welcome",
+  "common": {
+    "update": "Update",
+    "create": "Create"
+  },
   "dashboard": {
     "dashboard": "Dashboard",
     "tasksPerProject": "Tasks per project",
@@ -8,18 +12,47 @@
   "projects": {
     "projects": "Projects",
     "name": "Name",
+    "title": "Title",
     "search": "Search",
     "description": "Description",
     "createdAt": "Created At",
     "actions": "Actions",
     "update": "Update",
     "create": "Create",
+    "titleHint": "Must be a title grater that 5 characters and minor than 100",
+    "descriptionHint": "Must be a description grater that 10 characters and minor than 300",
     "deleteSelected": "Delete Selected",
     "deletedMultiple": "Projects deleted",
+    "descriptionPlaceholder": "Enter project description",
+    "titlePlaceholder": "Enter project name",
     "deleted": "Project deleted",
     "updated": "Project updated",
     "created": "Project created",
     "updatedAt": "Updated At"
+  },
+  "prompts": {
+    "prompts": "Prompts",
+    "title": "Title",
+    "search": "Search",
+    "titleHint": "Must be a title grater that 5 characters and minor than 100",
+    "descriptionHint": "Must be a description grater that 10 characters and minor than 300",
+    "fieldsRequired": "Fields are required",
+    "description": "Description",
+    "systemPrompt": "System Prompt",
+    "systemPromptShort": "Sys Prompt",
+    "titlePlaceholder": "Enter prompt title",
+    "descriptionPlaceholder": "Enter prompt description",
+    "systemPromptPlaceholder": "Enter system prompt instructions",
+    "createdAt": "Created At",
+    "updateAt": "Updated At",
+    "actions": "Actions",
+    "update": "Update Prompt",
+    "create": "Create Prompt",
+    "deleteSelected": "Delete Selected",
+    "deletedMultiple": "Prompts deleted",
+    "deleted": "Prompt deleted",
+    "updated": "Prompt updated",
+    "created": "Prompt created"
   },
   "tasks": {
     "tasks": "Tasks",
@@ -99,6 +132,7 @@
   },
   "profile": {
     "title": "User Profile",
+    "personalInfo": "Personal Information",
     "firstName": "First Name",
     "lastName": "Last Name",
     "email": "Email",
@@ -111,7 +145,18 @@
     "profile": "Profile",
     "uploadAvatar": "Upload Avatar",
     "phone": "Phone",
-    "save": "Save"
+    "save": "Save Changes",
+    "updated": "Profile updated successfully",
+    "updateError": "Error updating profile",
+    "errorLoading": "Error loading profile",
+    "aiSettingsTitle": "AI Configuration",
+    "aiSettingsDesc": "Configure your AI provider to use vision features in the browser extension.",
+    "aiBaseUrl": "Base URL",
+    "aiApiKey": "API Key",
+    "aiModel": "Model Name",
+    "saveAiSettings": "Save AI Settings",
+    "aiSettingsUpdated": "AI settings updated successfully",
+    "aiSettingsError": "Error updating AI settings"
   },
   "users" : {
     "users": "Users"
@@ -150,6 +195,4 @@
     "tokenMissing": "Reset token missing or invalid",
     "passwordMismatch": "Passwords do not match"
   }
-
-
 }

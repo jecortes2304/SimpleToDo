@@ -4,7 +4,7 @@ import {useTranslation} from "react-i18next";
 import {Outlet} from "react-router-dom";
 import {AlertManager} from "./AlertManager";
 import {ClipboardIcon, FolderIcon, HomeIcon} from "@heroicons/react/24/solid";
-import {UsersIcon} from "@heroicons/react/16/solid";
+import {DocumentTextIcon, UsersIcon} from "@heroicons/react/16/solid";
 import useAuthStore from "../store/authStore.ts";
 
 function getRoleFromToken(): number | null {
@@ -65,12 +65,20 @@ const DrawerNavigation: React.FC = () => {
                     </li>
 
                     {role === 1 && (
-                        <li className="text-lg">
-                            <a href="/users" className="flex items-center gap-2">
-                                <UsersIcon className="h-5 w-5" />
-                                {t('users.users')}
-                            </a>
-                        </li>
+                        <>
+                            <li className="text-lg">
+                                <a href="/users" className="flex items-center gap-2">
+                                    <UsersIcon className="h-5 w-5" />
+                                    {t('users.users')}
+                                </a>
+                            </li>
+                            <li className="text-lg">
+                                <a href="/prompts" className="flex items-center gap-2">
+                                    <DocumentTextIcon className="h-5 w-5" />
+                                    {t('prompts.prompts')}
+                                </a>
+                            </li>
+                        </>
                     )}
                 </ul>
             </div>
