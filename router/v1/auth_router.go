@@ -28,11 +28,11 @@ func (authController *AuthController) login(c echo.Context) error {
 	if err := c.Bind(&body); err != nil {
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid data", err.Error(), true)
 	}
+
 	validate := validator.New()
-	errorValidate := validate.Struct(body)
-	if errorValidate != nil {
+	if err := validate.Struct(body); err != nil {
 		var errorsString []string
-		for _, e := range errorValidate.(validator.ValidationErrors) {
+		for _, e := range err.(validator.ValidationErrors) {
 			errorsString = append(errorsString, e.Field()+" is "+e.Tag()+" "+e.Param())
 		}
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", errorsString, true)
@@ -43,20 +43,25 @@ func (authController *AuthController) login(c echo.Context) error {
 		return response.WriteJSONResponse(c, http.StatusUnauthorized, "Login failed", err.Error(), true)
 	}
 
-	// Set JWT in HTTP-only cookie
-	cookie := &http.Cookie{
-		Name:     middleware.AuthCookieName,
-		Value:    token,
-		Path:     "/",
-		HttpOnly: true,
-		// In dev mode, Secure should be false. In production, it should be true.
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
-		Expires:  time.Now().Add(72 * time.Hour),
+	appName := c.Request().Header.Get("Application-Name")
+	if appName == "SimpleTodoWeb" {
+		cookie := &http.Cookie{
+			Name:     middleware.AuthCookieName,
+			Value:    token,
+			Path:     "/",
+			HttpOnly: true,
+			Secure:   false,
+			SameSite: http.SameSiteLaxMode,
+			Expires:  time.Now().Add(72 * time.Hour),
+		}
+		c.SetCookie(cookie)
 	}
-	c.SetCookie(cookie)
 
-	return response.WriteJSONResponse(c, http.StatusOK, "Login success", nil, false)
+	data := map[string]interface{}{
+		"token": token,
+	}
+
+	return response.WriteJSONResponse(c, http.StatusOK, "Login success", data, false)
 }
 
 func (authController *AuthController) register(c echo.Context) error {
@@ -96,7 +101,6 @@ func (authController *AuthController) register(c echo.Context) error {
 }
 
 func (authController *AuthController) logout(c echo.Context) error {
-	// Invalidate cookie on server side
 	cookie := &http.Cookie{
 		Name:     middleware.AuthCookieName,
 		Value:    "",

@@ -44,6 +44,7 @@ services:
       DB_NAME: ${DB_NAME:-simpletodo_db}
       DB_SSL: ${DB_SSL:-false}
       DB_TMEZONE: ${DB_TMEZONE:-UTC}
+      DEBUG: ${DEBUG:-false}
     volumes:
       - ./data:/data
     restart: unless-stopped

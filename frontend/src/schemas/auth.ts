@@ -7,6 +7,12 @@ export interface TokenResponse {
     token: string
 }
 
+export interface CurrentUserMe {
+    id: number
+    email: string
+    role: number
+}
+
 export type GenderType = "male" | "female"
 
 export interface RegisterDto {

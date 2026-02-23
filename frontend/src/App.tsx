@@ -17,6 +17,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import {AdminRoute} from "./utils/AdminRoute.tsx";
 import {useBootstrapAuth} from './hooks/useBootstrapAuth';
+import PromptsPage from "./pages/PromptsPage.tsx";
 
 function App() {
 
@@ -66,6 +67,7 @@ function App() {
                             <Route path="/profile" element={<ProfilePage/>}/>
                             <Route element={<AdminRoute/>}>
                                 <Route path="/users" element={<UsersPage/>}/>
+                                <Route path="/prompts" element={<PromptsPage/>}/>
                             </Route>
                         </Route>
                     </Route>

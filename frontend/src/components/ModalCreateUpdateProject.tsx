@@ -76,7 +76,7 @@ const ModalCreateUpdateProject: React.FC<ModalCreateUpdateProjectProps> = ({moda
 
                 <div className="form-control mb-4 flex flex-col w-full">
                     <label className="label mb-2">
-                        <span className="label-text">{t('tasks.title')}</span>
+                        <span className="label-text">{t('projects.title')}</span>
                     </label>
                     <label className="input validator w-full">
                         <ChatBubbleLeftIcon className="h-[1em] opacity-50"/>
@@ -84,20 +84,20 @@ const ModalCreateUpdateProject: React.FC<ModalCreateUpdateProjectProps> = ({moda
                             onChange={(e) => setName(e.target.value)}
                             type="input"
                             required
-                            placeholder={t('tasks.titlePlaceHolder')}
+                            placeholder={t('projects.titlePlaceholder')}
                             minLength={5}
                             maxLength={100}
                             value={name}
-                            title={t('tasks.titleHint')}/>
+                            title={t('projects.titleHint')}/>
                     </label>
                     <p className="validator-hint">
-                        {t('tasks.titleHint')}
+                        {t('projects.titleHint')}
                     </p>
                 </div>
 
                 <div className="form-control mb-6 flex flex-col w-full">
                     <label className="label mb-2">
-                        <span className="label-text">{t('tasks.description')}</span>
+                        <span className="label-text">{t('projects.description')}</span>
                     </label>
                     <label className="textarea validator w-full">
                         <DocumentTextIcon className="h-[1em] opacity-50"/>
@@ -105,14 +105,14 @@ const ModalCreateUpdateProject: React.FC<ModalCreateUpdateProjectProps> = ({moda
                             onChange={(e) => setDescription(e.target.value)}
                             required
                             className="textarea textarea-ghost w-full"
-                            placeholder={t('tasks.descriptionPlaceholder')}
+                            placeholder={t('projects.descriptionPlaceholder')}
                             minLength={10}
                             maxLength={300}
                             value={description}
-                            title={t('tasks.descriptionHint')}/>
+                            title={t('projects.descriptionHint')}/>
                     </label>
                     <p className="validator-hint">
-                        {t('tasks.descriptionHint')}
+                        {t('projects.descriptionHint')}
                     </p>
                 </div>
 

@@ -134,10 +134,44 @@ func (uc *UserController) updateProfile(c echo.Context) error {
 	return response.WriteJSONResponse(c, http.StatusOK, "User updated successfully", updatedUser, false)
 }
 
+func (uc *UserController) getAISettings(c echo.Context) error {
+	id := c.Get("user_id").(float64)
+	settings, err := uc.UserService.GetAISettings(uint(id))
+	if err != nil {
+		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Failed to fetch AI settings", err.Error(), true)
+	}
+	return response.WriteJSONResponse(c, http.StatusOK, "AI Settings fetched", settings, false)
+}
+
+func (uc *UserController) updateAISettings(c echo.Context) error {
+	id := c.Get("user_id").(float64)
+	var body request.UpdateAISettingsRequest
+	if err := c.Bind(&body); err != nil {
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid data", err.Error(), true)
+	}
+
+	validate := validator.New()
+	if err := validate.Struct(body); err != nil {
+		var errorsString []string
+		for _, e := range err.(validator.ValidationErrors) {
+			errorsString = append(errorsString, e.Field()+" is "+e.Tag()+" "+e.Param())
+		}
+		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", errorsString, true)
+	}
+
+	settings, err := uc.UserService.UpdateAISettings(uint(id), body)
+	if err != nil {
+		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Failed to update AI settings", err.Error(), true)
+	}
+	return response.WriteJSONResponse(c, http.StatusOK, "AI Settings updated", settings, false)
+}
+
 func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	userRepository := repository.NewUserRepository(db)
+	aiServerRepository := repository.NewAIServerRepository(db)
 	userMapper := mapper.NewUserMapperImpl()
-	userService := service.NewUserService(userRepository, userMapper)
+
+	userService := service.NewUserService(userRepository, aiServerRepository, userMapper)
 	userController := NewUserController(userService)
 
 	usersGroup := v1.Group("/users")
@@ -182,9 +216,10 @@ func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Param id path int true "User ID"
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
 	// @Failure 403 {object} response.StandardResponseError
 	// @Failure 404 {object} response.StandardResponseError
-	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
 	// @Router /users/user/{id} [delete]
 	usersGroup.DELETE("/user/:id", userController.deleteUser)
 
@@ -208,6 +243,7 @@ func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Security BearerAuth
 	// @Success 200 {object} response.StandardResponseOk
 	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 404 {object} response.StandardResponseError
 	// @Router /profile [get]
 	userProfileGroup.GET("", userController.getUserProfile)
 
@@ -224,4 +260,26 @@ func UserRouters(db *gorm.DB, v1 *echo.Group) {
 	// @Failure 500 {object} response.StandardResponseError
 	// @Router /profile [patch]
 	userProfileGroup.PATCH("", userController.updateProfile)
+
+	// @Summary Get AI Settings
+	// @Description Get the current user's AI server configuration
+	// @Tags Profile
+	// @Security BearerAuth
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /profile/ai-settings [get]
+	userProfileGroup.GET("/ai-settings", userController.getAISettings)
+
+	// @Summary Update AI Settings
+	// @Description Update the current user's AI server configuration
+	// @Tags Profile
+	// @Security BearerAuth
+	// @Param payload body request.UpdateAISettingsRequest true "AI Settings payload"
+	// @Success 200 {object} response.StandardResponseOk
+	// @Failure 400 {object} response.StandardResponseError
+	// @Failure 401 {object} response.StandardResponseError
+	// @Failure 500 {object} response.StandardResponseError
+	// @Router /profile/ai-settings [put]
+	userProfileGroup.PUT("/ai-settings", userController.updateAISettings)
 }

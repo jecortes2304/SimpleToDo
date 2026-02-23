@@ -2,7 +2,7 @@ import {apiClient} from './apiClient'
 import {ApiResponse, Pagination} from '../schemas/globals'
 import {AxiosResponse} from 'axios'
 import {handleApiError, handleApiResponse} from '../utils/apiUtils'
-import {UpdateUserRequestDto, UserResponseDto} from '../schemas/user'
+import {AISettingsDto, UpdateAISettingsDto, UpdateUserRequestDto, UserResponseDto} from '../schemas/user'
 
 
 export async function getProfile(): Promise<ApiResponse<UserResponseDto>> {
@@ -67,5 +67,25 @@ export async function deleteUser(id: number): Promise<ApiResponse<null>> {
     } catch (error) {
         console.error('Error deleting user:', error)
         return handleApiError<null>(error as AxiosResponse<ApiResponse<null>>)
+    }
+}
+
+export async function getAISettings(): Promise<ApiResponse<AISettingsDto>> {
+    try {
+        const res: AxiosResponse<ApiResponse<AISettingsDto>> = await apiClient.get('/profile/ai-settings')
+        return handleApiResponse(res)
+    } catch (error) {
+        console.error('Error fetching AI settings:', error)
+        return handleApiError<AISettingsDto>(error as AxiosResponse<ApiResponse<AISettingsDto>>)
+    }
+}
+
+export async function updateAISettings(data: UpdateAISettingsDto): Promise<ApiResponse<AISettingsDto>> {
+    try {
+        const res: AxiosResponse<ApiResponse<AISettingsDto>> = await apiClient.put('/profile/ai-settings', data)
+        return handleApiResponse(res)
+    } catch (error) {
+        console.error('Error updating AI settings:', error)
+        return handleApiError<AISettingsDto>(error as AxiosResponse<ApiResponse<AISettingsDto>>)
     }
 }

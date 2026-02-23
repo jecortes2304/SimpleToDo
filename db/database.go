@@ -68,6 +68,8 @@ func InitDB() (error, *gorm.DB) {
 		&models.Task{},
 		&models.PasswordResetToken{},
 		&models.EmailVerificationToken{},
+		&models.Prompt{},
+		&models.AIServerSettings{},
 	); err != nil {
 		return err, nil
 	}
