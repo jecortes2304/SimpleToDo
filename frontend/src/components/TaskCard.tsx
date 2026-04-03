@@ -2,6 +2,15 @@ import React from 'react';
 import {TaskStatus} from "../schemas/tasks.ts";
 import {useTranslation} from 'react-i18next';
 import {ArrowDownTrayIcon, ArrowPathIcon} from "@heroicons/react/16/solid";
+import {useSortable} from "@dnd-kit/react/sortable";
+
+
+export interface TaskCardData {
+    type: string,
+    itemId: number
+    fromColumn: TaskStatus,
+    toColumn: TaskStatus,
+}
 
 interface TaskCardProps {
     id: number;
@@ -14,7 +23,12 @@ interface TaskCardProps {
     selected?: boolean;
     onToggle?: () => void;
     onEdit?: () => void;
+    idItem: string;
+    index: number;
+    currentColumn: TaskStatus;
 }
+
+
 
 const TaskCard: React.FC<TaskCardProps> = ({
                                                id,
@@ -27,8 +41,22 @@ const TaskCard: React.FC<TaskCardProps> = ({
                                                selected,
                                                onToggle,
                                                onEdit,
+                                               index,
+                                               currentColumn
                                            }) => {
     const {t} = useTranslation();
+    const {ref, isDragging} = useSortable({
+        id,
+        index,
+        data: {
+            type: 'item',
+            itemId: id,
+            toColumn: currentColumn,
+        } as TaskCardData,
+        group: currentColumn,
+        type: 'item',
+        accept: ['item']
+    });
 
     const renderStatusByType = (status: TaskStatus) => {
         switch (status) {
@@ -50,17 +78,17 @@ const TaskCard: React.FC<TaskCardProps> = ({
     const renderBgByStatus = (status: TaskStatus) => {
         switch (status) {
             case 'completed':
-                return 'bg-success/10';
+                return 'bg-success/15';
             case 'pending':
-                return 'bg-base-100';
+                return 'bg-info/15';
             case 'ongoing':
-                return 'bg-primary/10';
+                return 'bg-primary/15';
             case 'blocked':
-                return 'bg-error/10';
+                return 'bg-error/15';
             case 'cancelled':
-                return 'bg-warning/10';
+                return 'bg-warning/15';
             default:
-                return 'bg-info/10';
+                return 'bg-info/15';
         }
     };
 
@@ -81,8 +109,8 @@ const TaskCard: React.FC<TaskCardProps> = ({
     };
 
     return (
-        <div
-            className={`indicator flex justify-center items-center w-full transition-opacity duration-300 cursor-pointer ${
+        <div ref={ref} data-dragging={isDragging}
+                             className={`indicator flex justify-center items-center w-full transition-opacity duration-300 cursor-pointer ${
                 selected ? 'opacity-50' : 'opacity-100'
             }`}
         >
@@ -92,8 +120,16 @@ const TaskCard: React.FC<TaskCardProps> = ({
             <div className={`card w-full shadow-xl ${renderBgByStatus(status)}`}>
                 <div
                     className="absolute top-1 left-1 text-xs text-gray-400">
-                    <input type="checkbox" checked={selected} readOnly className="checkbox checkbox-sm"
-                           onClick={onToggle}/>
+                    <input
+                        type="checkbox"
+                        checked={selected}
+                        readOnly
+                        className="checkbox checkbox-sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onToggle?.();
+                        }}
+                    />
                 </div>
                 <span
                     className="absolute top-6 left-6 mb-3 pb-5 text-xs text-gray-400">● #{id} | {t('tasks.project')} {projectId}
@@ -105,13 +141,13 @@ const TaskCard: React.FC<TaskCardProps> = ({
                             ? `${description.slice(0, 30)}...`
                             : description
                     }</p>
-                    <div className="mt-5 inline-flex justify-between text-xs text-gray-400 items-center">
-                        <div className="flex gap-2">
-                            <ArrowDownTrayIcon className="h-4 w-4" title={t('tasks.createdAt')}/>
+                    <div className="mt-3 inline-flex justify-between text-gray-400 items-center text-[10px] gap-3">
+                        <div className="flex gap-1">
+                            <ArrowDownTrayIcon className="h-3 w-3" title={t('tasks.createdAt')}/>
                             {formatDate(createdAt)}
                         </div>
-                        <div className="flex gap-2">
-                            <ArrowPathIcon className="h-4 w-4" title={t('tasks.updatedAt')}/>
+                        <div className="flex gap-1">
+                            <ArrowPathIcon className="h-3 w-3" title={t('tasks.updatedAt')}/>
                             {formatDate(updatedAt)}
                         </div>
                     </div>

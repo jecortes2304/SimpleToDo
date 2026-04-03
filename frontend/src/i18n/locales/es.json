@@ -55,6 +55,8 @@
     "created": "Prompt creado"
   },
   "tasks": {
+    "confirmDeleteOne": "¿Seguro que quieres eliminar esta tarea?",
+    "confirmDeleteMany": "¿Seguro que quieres eliminar {{count}} tareas?",
     "tasks": "Tareas",
     "task": "Tarea",
     "projects": "Proyectos",

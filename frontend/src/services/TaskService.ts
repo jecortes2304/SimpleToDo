@@ -4,15 +4,22 @@ import {ApiResponse, SortOrder} from "../schemas/globals.ts";
 import {AxiosResponse} from "axios";
 import {handleApiError, handleApiResponse} from "../utils/apiUtils.ts";
 
+
 export async function getAllTasksByProject(
     limit: number,
     page: number,
     sort: SortOrder,
-    projectId: number
+    projectId: number,
+    taskTitle?: string
 ): Promise<ApiResponse<Task>> {
     try {
         const res: AxiosResponse<ApiResponse<Task>> = await apiClient.get<ApiResponse<Task>>(`/tasks/${projectId}`, {
-            params: { limit, page, sort },
+            params: {
+                limit,
+                page,
+                sort,
+                taskTitle: taskTitle?.trim() ? taskTitle.trim() : undefined,
+            },
         })
         return handleApiResponse<Task>(res)
     } catch (error) {

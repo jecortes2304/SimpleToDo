@@ -21,7 +21,7 @@ const ProjectsPage: React.FC = () => {
     const [projectToEdit, setProjectToEdit] = useState<Project | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [page, setPage] = useState(1);
-    const [limit, setLimit] = useState(10);
+    const [limit, setLimit] = useState(100);
     const [sort, setSort] = useState<SortOrder>('asc');
     const [totalPages, setTotalPages] = useState(0);
     const [totalItems, setTotalItems] = useState(0);
@@ -193,7 +193,7 @@ const ProjectsPage: React.FC = () => {
                                     />
                                 </td>
                                 <td>{project.name}</td>
-                                <td>{project.description}</td>
+                                <td>{project.description.length > 30 ? `${project.description.slice(0, 30)}...` : project.description}</td>
                                 <td>{new Date(project.createdAt).toLocaleString()}</td>
                                 <td>{new Date(project.updatedAt).toLocaleString()}</td>
                                 <td>
@@ -215,7 +215,7 @@ const ProjectsPage: React.FC = () => {
                     ) : (
                         <tr>
                             <td colSpan={6}>
-                                <div className="flex justify-center items-center min-h-[200px]">
+                                <div className="flex justify-center items-center min-h-50">
                                     <Lottie className="h-50 w-50" animationData={notFoundLottie} loop={true}/>
                                 </div>
                             </td>

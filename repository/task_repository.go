@@ -5,6 +5,7 @@ import (
 	"SimpleToDo/models"
 	"errors"
 	"gorm.io/gorm"
+	"strings"
 )
 
 type TaskRepository struct {
@@ -100,16 +101,12 @@ func (t *TaskRepository) FindAll(pagination response.Pagination, userId int) (*r
 	return &pagination, nil
 }
 
-func (t *TaskRepository) FindAllByProjectId(pagination response.Pagination, projectId int, userId int) (*response.Pagination, error) {
+func (t *TaskRepository) FindAllByProjectId(pagination response.Pagination, projectId int, userId int, taskTitle string, statusId int) (*response.Pagination, error) {
 	if t.Db == nil {
 		return nil, errors.New("database connection is nil")
 	}
 	var tasks []*models.Task
-
-	condition1 := response.NewCondition("user_id", response.Equal, userId, response.And)
-	condition2 := response.NewCondition("project_id", response.Equal, projectId, response.Empty)
-	conditions := []response.Condition{*condition1, *condition2}
-
+	conditions := getConditionsByParams(taskTitle, statusId, projectId, userId)
 	queryStr, args := response.ToQueryStringMany(conditions)
 
 	result := t.Db.Where(queryStr, args...).
@@ -123,4 +120,36 @@ func (t *TaskRepository) FindAllByProjectId(pagination response.Pagination, proj
 	pagination.Items = tasks
 
 	return &pagination, nil
+}
+
+func getConditionsByParams(taskTitle string, statusId int, projectId int, userId int) []response.Condition {
+	var conditions []response.Condition
+
+	if taskTitle != "" {
+		conditions = append(conditions, response.Condition{
+			Column:   "LOWER(title)",
+			Operator: response.Like,
+			Value:    "%" + strings.ToLower(taskTitle) + "%",
+			Modifier: response.And,
+		})
+	}
+	if statusId != 0 {
+		conditions = append(conditions, response.Condition{
+			Column:   "status_id",
+			Operator: response.Equal,
+			Value:    statusId,
+			Modifier: response.And,
+		})
+	}
+	conditions = append(conditions, response.Condition{
+		Column:   "user_id",
+		Operator: response.Equal,
+		Value:    userId,
+		Modifier: response.And})
+	conditions = append(conditions, response.Condition{
+		Column:   "project_id",
+		Operator: response.Equal,
+		Value:    projectId,
+		Modifier: response.And})
+	return conditions
 }

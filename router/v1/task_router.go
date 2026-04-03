@@ -69,7 +69,10 @@ func (taskController *TaskController) getAllTaskByProject(c echo.Context) error 
 		return response.WriteJSONResponse(c, http.StatusBadRequest, "Invalid request", "Invalid project ID", true)
 	}
 
-	tasks, err := taskController.TaskService.GetAllTaskByProjectId(pagination, projectIdInt, userIdInt)
+	taskTitle := c.QueryParam("taskTitle")
+	status := c.QueryParam("status")
+
+	tasks, err := taskController.TaskService.GetAllTaskByProjectId(pagination, projectIdInt, userIdInt, taskTitle, status)
 	if err != nil {
 		return response.WriteJSONResponse(c, http.StatusInternalServerError, "Internal Server Error", err.Error(), true)
 	}
