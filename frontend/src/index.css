@@ -5,3 +5,22 @@
 html, body, #root {
     height: 100%;
 }
+
+.kanban-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.column {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 10px;
+    min-width: 230px;
+    min-height: 200px;
+    border: 1px solid rgba(9, 9, 9, 0.1);
+    border-radius: 10px;
+}
