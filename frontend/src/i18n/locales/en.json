@@ -55,6 +55,8 @@
     "created": "Prompt created"
   },
   "tasks": {
+    "confirmDeleteOne": "Are you sure you want to delete this task?",
+    "confirmDeleteMany": "Are you sure you want to delete {{count}} tasks?",
     "tasks": "Tasks",
     "projects": "Projects",
     "task": "Task",

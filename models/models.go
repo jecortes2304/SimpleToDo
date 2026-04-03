@@ -20,7 +20,7 @@ type Role struct {
 
 type Task struct {
 	gorm.Model
-	Title       string `gorm:"uniqueIndex:idx_title_project_user;not null"`
+	Title       string `gorm:"not null"`
 	Description string
 	StatusId    uint
 	Status      Status `gorm:"foreignKey:StatusId"`

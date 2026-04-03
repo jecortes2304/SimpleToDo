@@ -51,9 +51,14 @@ func (taskService *TaskService) GetAll(pagination response.Pagination, userId in
 	return tasksResponsePaginated, nil
 }
 
-func (taskService *TaskService) GetAllTaskByProjectId(pagination response.Pagination, projectId int, userId int) (*response.Pagination, error) {
+func (taskService *TaskService) GetAllTaskByProjectId(pagination response.Pagination, projectId int, userId int, taskTitle string, status string) (*response.Pagination, error) {
 
-	tasksResponsePaginated, err := taskService.TaskRepository.FindAllByProjectId(pagination, projectId, userId)
+	statusModel, err := taskService.StatusRepository.FindByValue(status)
+	if err != nil {
+		return nil, err
+	}
+	statusId := statusModel.ID
+	tasksResponsePaginated, err := taskService.TaskRepository.FindAllByProjectId(pagination, projectId, userId, taskTitle, int(statusId))
 	if err != nil {
 		return nil, err
 	}
