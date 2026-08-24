@@ -1,5 +1,11 @@
 vendor
 .idea
-config/.env
-*.env
-frontend/node_modules
+internal/config/.env
+.env
+web/node_modules
+web/dist
+build
+dist
+.pnpm-store
+internal/app/webdist/*
+!internal/app/webdist/placeholder.txt
