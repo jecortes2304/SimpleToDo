@@ -1,0 +1,35 @@
+root = "."
+tmp_dir = "build/.air"
+
+[build]
+cmd = "go build -o ./build/.air/simpletodo ./cmd/app"
+entrypoint = ["./build/.air/simpletodo"]
+include_dir = ["cmd", "internal"]
+include_file = ["embed.go", "go.mod", "go.sum"]
+include_ext = ["go", "html", "js", "css", "svg"]
+exclude_dir = ["api", "assets", "build", "data", "deployments", "web"]
+exclude_regex = ["_test\\.go"]
+exclude_unchanged = true
+delay = 300
+stop_on_error = true
+send_interrupt = true
+kill_delay = 500
+
+[build.windows]
+cmd = "go build -o ./build/.air/simpletodo.exe ./cmd/app"
+entrypoint = ["build\\.air\\simpletodo.exe"]
+
+[[build.rules]]
+name = "frontend"
+include_dir = ["web/src", "web/public"]
+include_file = ["web/index.html", "web/package.json", "web/pnpm-lock.yaml", "web/vite.config.ts", "web/tailwind.config.ts", "web/tsconfig.json", "web/tsconfig.app.json", "web/tsconfig.node.json"]
+include_ext = ["ts", "tsx", "css", "json", "html", "svg", "lottie"]
+cmd = "pnpm --dir web build"
+delay = 300
+
+[log]
+time = true
+
+[misc]
+clean_on_exit = true
+startup_banner = "SimpleTodo development watcher"
