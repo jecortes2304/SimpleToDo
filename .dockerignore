@@ -1,0 +1,9 @@
+.git
+.idea
+.tmp
+build
+data
+vendor
+web/dist
+web/node_modules
+internal/app/webdist

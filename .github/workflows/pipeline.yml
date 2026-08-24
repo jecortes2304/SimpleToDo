@@ -1,0 +1,243 @@
+name: Quality and Release
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+    types:
+      - opened
+      - synchronize
+      - reopened
+      - edited
+  push:
+    branches:
+      - develop
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: pipeline-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref_name != 'main' }}
+
+permissions:
+  contents: read
+
+jobs:
+  validate-pr:
+    name: Validate PR
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate branch and Conventional Commit title
+        env:
+          BASE_BRANCH: ${{ github.base_ref }}
+          HEAD_BRANCH: ${{ github.head_ref }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [[ "$BASE_BRANCH" == "main" ]]; then
+            if [[ "$HEAD_BRANCH" != "develop" ]]; then
+              echo "Only develop may be merged into main."
+              exit 1
+            fi
+
+            release_title_pattern="^(feat|fix|chore|docs|refactor|test|ci|build|perf)(\\([a-z0-9._/-]+\\))?(!)?: .+"
+            if [[ ! "$PR_TITLE" =~ $release_title_pattern ]]; then
+              echo "Release PR titles must use Conventional Commits (for example: chore(release): publish develop)."
+              echo "Received: $PR_TITLE"
+              exit 1
+            fi
+            exit 0
+          fi
+
+          case "$HEAD_BRANCH" in
+            feature/*) expected_type="feat" ;;
+            fix/*) expected_type="fix" ;;
+            chore/*) expected_type="chore" ;;
+            docs/*) expected_type="docs" ;;
+            refactor/*) expected_type="refactor" ;;
+            test/*) expected_type="test" ;;
+            ci/*) expected_type="ci" ;;
+            build/*) expected_type="build" ;;
+            perf/*) expected_type="perf" ;;
+            dependabot/*) expected_type="chore" ;;
+            *)
+              echo "Unsupported branch name: $HEAD_BRANCH"
+              echo "Use feature/, fix/, chore/, docs/, refactor/, test/, ci/, build/ or perf/."
+              exit 1
+              ;;
+          esac
+
+          if [[ ! "$HEAD_BRANCH" =~ ^[a-z]+/[a-z0-9][a-z0-9._/-]*$ ]]; then
+            echo "Branch names must be lowercase and must not contain spaces."
+            exit 1
+          fi
+
+          title_pattern="^${expected_type}(\\([a-z0-9._/-]+\\))?(!)?: .+"
+          if [[ ! "$PR_TITLE" =~ $title_pattern ]]; then
+            echo "PR title must match: ${expected_type}(optional-scope)[!]: description"
+            echo "Received: $PR_TITLE"
+            exit 1
+          fi
+
+  quality:
+    name: Test and build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3 # v6.0.10
+        with:
+          package_json_file: web/package.json
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: make install
+
+      - name: Lint
+        run: make lint
+
+      - name: Test
+        run: make test
+
+      - name: Verify generated Swagger documentation
+        run: |
+          make swagger
+          git diff --exit-code -- api
+
+      - name: Build application
+        run: make build
+
+  release:
+    name: Publish release
+    if: github.event_name == 'push' && (github.ref_name == 'develop' || github.ref_name == 'main')
+    needs:
+      - quality
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+    steps:
+      - name: Checkout complete history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@b7ad1dad31e06c5925ef5d2fc7ad053ef454303e # v7.0.0
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@ff378ebe6b225b0680b81c1ad4498ae0d1d3a5e3 # v6.0.10
+        with:
+          package_json_file: web/package.json
+          run_install: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .node-version
+          cache: pnpm
+          cache-dependency-path: web/pnpm-lock.yaml
+
+      - name: Install frontend dependencies
+        run: make install
+
+      - name: Build embedded frontend
+        run: make web-sync
+
+      - name: Install GoReleaser
+        uses: goreleaser/goreleaser-action@f06c13b6b1a9625abc9e6e439d9c05a8f2190e94 # v7.2.3
+        with:
+          distribution: goreleaser
+          version: v2.17.1
+          install-only: true
+
+      - name: Calculate version and publish GitHub release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@b12c8f6015dc215fe37bc154d4ad456dd3833c90 # v6.0.0
+        with:
+          semantic_version: 25.0.9
+          extra_plugins: |
+            @semantic-release/commit-analyzer@13.0.1
+            @semantic-release/release-notes-generator@14.1.1
+            @semantic-release/github@12.0.9
+            @semantic-release/exec@7.1.0
+            conventional-changelog-conventionalcommits@10.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up QEMU
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+
+      - name: Set up Docker Buildx
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
+
+      - name: Log in to GitHub Container Registry
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4.6.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Generate container metadata
+        if: steps.semantic.outputs.new_release_published == 'true'
+        id: container-meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/simpletodo
+          tags: |
+            type=raw,value=${{ steps.semantic.outputs.new_release_version }}
+            type=raw,value=snapshot,enable=${{ github.ref_name == 'develop' }}
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ steps.semantic.outputs.new_release_git_tag }},enable=${{ github.ref_name == 'main' }}
+            type=semver,pattern={{major}},value=${{ steps.semantic.outputs.new_release_git_tag }},enable=${{ github.ref_name == 'main' }}
+            type=sha,prefix=sha-
+
+      - name: Capture build timestamp
+        if: steps.semantic.outputs.new_release_published == 'true'
+        id: build-info
+        shell: bash
+        run: echo "timestamp=$(date -u +'%Y-%m-%dT%H:%M:%SZ')" >> "$GITHUB_OUTPUT"
+
+      - name: Build and publish multi-platform image
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: docker/build-push-action@53b7df96c91f9c12dcc8a07bcb9ccacbed38856a # v7.3.0
+        with:
+          context: .
+          file: deployments/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ steps.container-meta.outputs.tags }}
+          labels: ${{ steps.container-meta.outputs.labels }}
+          build-args: |
+            VERSION=${{ steps.semantic.outputs.new_release_version }}
+            COMMIT=${{ steps.semantic.outputs.new_release_git_head }}
+            BUILD_TIME=${{ steps.build-info.outputs.timestamp }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
