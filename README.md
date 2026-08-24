@@ -25,9 +25,9 @@ High-level flow:
    - `POST /api/v1/auth/login` with email/password.
    - On success, the backend signs a JWT and sets it in a cookie named `auth_token`:
      - `HttpOnly: true` (not accessible from JavaScript).
-     - `SameSite: Lax` by default (configurable for different deployments).
-     - `Secure: false` in local development (should be `true` in production over HTTPS).
-   - The response body no longer returns the raw token.
+     - `SameSite: Lax`.
+     - `Secure` automatically enabled when `BASE_URL` uses HTTPS.
+   - API clients receive the JWT in the response; the web frontend relies only on the HTTP-only cookie.
 
 2. **Subsequent requests**
    - The frontend Axios client is configured with `withCredentials: true`.
@@ -54,69 +54,75 @@ High-level flow:
    - When expired or invalid, the JWT middleware returns `401` for any protected route, and the frontend reacts by
      clearing the session and redirecting to `/auth` via the route guards.
 
+### Google sign-in
+
+Google authentication uses the server-side OpenID Connect authorization-code flow. The browser starts at
+`GET /api/v1/auth/oauth/google`, Google returns to `GET /api/v1/auth/oauth/google/callback`, and the backend validates a
+short-lived HTTP-only `state` cookie before accepting the response. Only the stable Google subject is stored; Google
+access and refresh tokens are not persisted.
+
+Create a Google OAuth client of type **Web application** and register this exact local redirect URI:
+
+```text
+http://localhost:8000/api/v1/auth/oauth/google/callback
+```
+
+For production, register `<BASE_URL>/api/v1/auth/oauth/google/callback` and use HTTPS. Set both
+`GOOGLE_CLIENT_ID` and `GOOGLE_CLIENT_SECRET`; when either is missing, Google authentication remains disabled and the
+frontend hides its button. Never commit the client secret.
+
+Google accounts follow the same SimpleTodo email-verification policy as password accounts. A new account receives no
+session until it verifies the application email. Unverified non-admin accounts are permanently deleted seven days
+after registration; verification links last 24 hours and can be requested again during that period.
+
 ---
 
 ## 📂 Project Structure
 
 ```text
-├───.github
-│   └───workflows
-├───app
-├───config
-│   └───static
-│       └───templates
-├───db
-├───docs
-├───dto
-│   ├───request
-│   └───response
-├───frontend
-│   ├───dist
-│   │   └───assets
-│   ├───public
-│   └───src
-│       ├───assets
-│       │   └───lottie
-│       ├───components
-│       ├───hooks
-│       ├───i18n
-│       │   └───locales
-│       ├───pages
-│       ├───schemas
-│       ├───services
-│       ├───store
-│       └───utils
-├───middleware
-├───models
-├───repository
-├───router
-│   └───v1
-├───service
-└───util
-    ├───mailer
-    └───mapper
+├── api/                 # Generated Swagger files
+├── assets/              # Embedded application assets and documentation images
+├── cmd/app/             # Go executable entry point
+├── deployments/         # Dockerfile and Compose definition
+├── internal/            # Backend application, DTOs, routes, services and repositories
+│   └── app/webdist/     # Frontend bundle synchronized for go:embed
+├── web/                 # React, TypeScript and Vite application
+├── embed.go
+└── Makefile
 ```
 
 ---
 
 ## 🚀 Build & Run Locally
 
-### 1. Build the backend
+Install the prerequisites: Go, Node.js, pnpm and GNU Make. Then install the frontend dependencies once:
 
 ```bash
-go build -o todoapp ./app
+make install
 ```
 
-### 2. (Optional) Regenerate Swagger Documentation
+For normal development, use one watcher and one HTTP server:
 
 ```bash
-swag init -d "./app,./router/v1,./dto/request,./dto/response" -o docs --parseDependency --parseDependencyLevel 3 --parseFuncBody
+make dev
 ```
 
-### 3. Run the app
+Air watches the Go and frontend sources. Frontend changes make Vite rebuild directly into `internal/app/webdist`, then
+Air recompiles Go and restarts the backend. The UI and API are both served from `http://localhost:8000`; a separate Vite
+server is not required.
+
+Other useful commands:
 
 ```bash
-./todoapp
+make run       # Build the latest frontend, embed it and run the backend
+make build     # Create build/simpletodo (build/simpletodo.exe on Windows)
+make lint      # ESLint + go vet
+make test      # Run frontend and Go tests
+make clean     # Remove generated binaries, caches, archives and embedded frontend output (stop make dev first)
+make swagger   # Regenerate api/docs.go, api/swagger.json and api/swagger.yaml
+make release-check # Validate .goreleaser.yaml
+make snapshot  # Build local cross-platform release archives without publishing
+make help      # Show the command list
 ```
 
 ---
@@ -167,9 +173,12 @@ SMTP_USER=user
 SMTP_PASSWORD=pass
 SMTP_FROM_EMAIL=app@example.com
 
+# Optional Google sign-in (both values are required to enable it)
+GOOGLE_CLIENT_ID=your-web-client-id.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+
 ROOT_FIRSTNAME=Admin
 ROOT_LASTNAME=User
-ROOT_PHONE=+123456789
 ROOT_EMAIL=admin@example.com
 ROOT_USERNAME=admin
 ROOT_PASSWORD=changeme
@@ -191,7 +200,8 @@ TIMEZONE=UTC
 
 ### Frontend environment
 
-The React frontend (Vite) expects a `.env` file in the `frontend` directory with at least:
+The React frontend uses relative `/api/v1` requests when served by the Go application. An optional `web/.env` can
+override the base URL when needed:
 
 ```env
 VITE_API_BASE_URL=http://localhost:8000
@@ -202,34 +212,21 @@ The Axios client is configured as:
 - `baseURL = ${VITE_API_BASE_URL}/api/v1`
 - `withCredentials = true` (so cookies are sent automatically)
 
-Ensure `CORS_ORIGIN` in the backend `.env` matches the frontend origin (e.g. `http://localhost:5173`).
+With `make dev`, the UI and backend share an origin, so no second development origin is required.
 
 ---
 
 ## 🐳 Run with Docker Compose
 
-A ready-to-use **docker-compose.yml** is provided:
-
-```yaml
-services:
-  app:
-    build: .
-    container_name: simpletodo
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env # Ensure this file exists in the same directory
-    volumes:
-      - ./data:/data
-    restart: unless-stopped
-```
+A production multi-stage Docker build is provided under `deployments/`. It builds the frontend first and embeds that
+bundle into the Go binary.
 
 ### Steps:
 
 1. Create a `.env` file in the project root (or copy an existing one).
 2. Run:
    ```bash
-   docker-compose up -d
+   make docker-compose-up
    ```
 3. Visit:  
    [http://localhost:8000](http://localhost:8000)
@@ -241,24 +238,53 @@ services:
 
 ## 📦 Versioning
 
-- Current version: **1.0.3**
-- Next release: will likely be **2.0.0** due to recent breaking changes.
+Git tags are the only source of truth for the application version. Do not edit `web/package.json` or create version
+branches manually. [semantic-release](https://semantic-release.gitbook.io/semantic-release/) calculates the next
+version from Conventional Commit pull-request titles:
 
-### Tagging a Release
+| Pull request title | Version change | Example |
+|---|---:|---|
+| `feat:` | Minor | `feat(auth): add Google sign-in` |
+| `fix:` | Patch | `fix(projects): avoid duplicate requests` |
+| `chore:`, `docs:`, `refactor:`, `test:`, `ci:`, `build:`, `perf:` | Patch | `chore(deps): update Go modules` |
+| Any type with `!` or a `BREAKING CHANGE` footer | Major | `feat(api)!: replace the authentication contract` |
+
+### Branch flow
+
+1. Create a short-lived branch from `develop`: `feature/name`, `fix/name`, `chore/name`, and so on. Do not include a
+   version number in the branch name.
+2. Open a pull request to `develop`. Its Conventional Commit title must match the branch prefix. Work pull requests
+   are squash-merged so their title becomes the commit message.
+3. Every successful push to `develop` publishes `vX.Y.Z-snapshot.N` as a GitHub pre-release and pushes the matching
+   container plus the `snapshot` tag to GHCR.
+4. To publish production, open a pull request from `develop` to `main` with a Conventional Commit title such as
+   `chore(release): publish develop`, then use a merge commit. A successful merge publishes `vX.Y.Z`, updates `latest`
+   in GHCR and creates the production GitHub Release.
+
+`main` and `develop` should reject direct pushes and require the `Validate PR` and `Test and build` checks. Only
+`develop` should be allowed as the source branch for pull requests targeting `main`.
+
+### Local release validation
 
 ```bash
-git tag v2.0.0
-git push origin v2.0.0
+make release-check
+make snapshot
 ```
-
----
 
 ## ⚡ CI/CD
 
-- The repository includes **GitHub Actions** under `.github/workflows`.
-- On each push or tag:
-  - The project is built for **Linux, Windows, and macOS**.
-  - Artifacts are attached to the GitHub Release.
+The `Quality and Release` GitHub Actions pipeline always runs lint, frontend and Go tests, Swagger verification and a
+complete application build before publishing anything.
+
+GitHub releases contain SHA-256 checksums and archives for:
+
+- Linux amd64 and arm64.
+- Windows amd64.
+- macOS amd64 and arm64.
+
+Container images are published to `ghcr.io/<owner>/simpletodo` for Linux amd64 and arm64. Snapshot releases never
+update `latest`; only a production release from `main` can do that. The workflow uses the repository `GITHUB_TOKEN`
+with `contents: write` and `packages: write`, so no additional publishing secret is required.
 
 ---
 
@@ -275,9 +301,9 @@ git push origin v2.0.0
 
 ## 🌟 SimpleToDo Images
 
-| <img src="docs/images/login.png" alt="Login" width="200"/> | <img src="docs/images/register.png" alt="Register" width="200"/> | <img src="docs/images/dashboard.png" alt="Dashboard" width="200"/> | <img src="docs/images/tasks.png" alt="Tasks" width="200"/> | <img src="docs/images/projects.png" alt="Projects" width="200"/> |
-|------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------------|
-| <img src="docs/images/profile.png" alt="Profile" width="200"/> | <img src="docs/images/light_tasks.png" alt="Light Tasks" width="200"/> | <img src="docs/images/swagger1.png" alt="Swagger UI 1" width="200"/> | <img src="docs/images/swagger2.png" alt="Swagger UI 2" width="200"/> | <img src="docs/images/terminal.png" alt="Terminal" width="200"/> |
+| <img src="assets/docs/images/login.png" alt="Login" width="200"/> | <img src="assets/docs/images/dashboard.png" alt="Dashboard" width="200"/> | <img src="assets/docs/images/tasks.png" alt="Tasks" width="200"/> | <img src="assets/docs/images/projects.png" alt="Projects" width="200"/> |
+|-------------------------------------------------------------------|--------------------------------------------------------------------|------------------------------------------------------------------|--------------------------------------------------------------------|
+| <img src="assets/docs/images/light_tasks.png" alt="Light Tasks" width="200"/> | <img src="assets/docs/images/swagger1.png" alt="Swagger UI 1" width="200"/> | <img src="assets/docs/images/swagger2.png" alt="Swagger UI 2" width="200"/> | <img src="assets/docs/images/terminal.png" alt="Terminal" width="200"/> |
 
 
 ----
