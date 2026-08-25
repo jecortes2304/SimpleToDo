@@ -120,8 +120,6 @@ make lint      # ESLint + go vet
 make test      # Run frontend and Go tests
 make clean     # Remove generated binaries, caches, archives and embedded frontend output (stop make dev first)
 make swagger   # Regenerate api/docs.go, api/swagger.json and api/swagger.yaml
-make release-check # Validate .goreleaser.yaml
-make snapshot  # Build local cross-platform release archives without publishing
 make help      # Show the command list
 ```
 
@@ -257,24 +255,18 @@ version from Conventional Commit pull-request titles:
    are squash-merged so their title becomes the commit message.
 3. Every successful push to `develop` publishes `vX.Y.Z-snapshot.N` as a GitHub pre-release and pushes the matching
    container plus the `snapshot` tag to GHCR.
-4. To publish production, open a pull request from `develop` to `main` with a Conventional Commit title such as
-   `chore(release): publish develop`, then use a merge commit. A successful merge publishes `vX.Y.Z`, updates `latest`
-   in GHCR and creates the production GitHub Release.
+4. To publish production, open a pull request from `develop` to `main` and use a merge commit. Its title does not
+   affect the version. A successful merge publishes `vX.Y.Z`, updates `latest` in GHCR and creates the production
+   GitHub Release.
 
-`main` and `develop` should reject direct pushes and require the `Validate PR` and `Test and build` checks. Only
-`develop` should be allowed as the source branch for pull requests targeting `main`.
-
-### Local release validation
-
-```bash
-make release-check
-make snapshot
-```
+`main` and `develop` should reject direct pushes and require the `Test and build` check. Only `develop` should be
+allowed as the source branch for pull requests targeting `main`.
 
 ## ⚡ CI/CD
 
-The `Quality and Release` GitHub Actions pipeline always runs lint, frontend and Go tests, Swagger verification and a
-complete application build before publishing anything.
+The `Quality and Release` GitHub Actions pipeline uses one quality job for branch validation, lint, tests, Swagger and
+the application build. Releases then create the platform archives and container image from that validated frontend
+build; Docker does not install frontend dependencies a second time.
 
 GitHub releases contain SHA-256 checksums and archives for:
 
