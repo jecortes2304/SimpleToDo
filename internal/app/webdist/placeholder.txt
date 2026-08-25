@@ -1,0 +1,3 @@
+This directory is used as the embed target for frontend build artifacts.
+Docker builds replace this placeholder with the generated Vite dist files before compiling the Go binary.
+
