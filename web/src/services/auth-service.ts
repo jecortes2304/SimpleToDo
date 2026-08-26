@@ -4,7 +4,11 @@ import {ApiResponse} from '../schemas/global.ts'
 import {handleApiError, handleApiResponse} from '../utils/api-utils.ts'
 import {AuthProviders, CurrentUserMe, LoginDto, RegisterDto, User} from '../schemas/auth.ts'
 
-const apiOrigin = (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+// OAuth navigation follows the same rule as API requests: only local Vite
+// development may target a separate origin; deployed builds stay same-origin.
+const apiOrigin = import.meta.env.DEV
+    ? (import.meta.env.VITE_API_BASE_URL ?? '').replace(/\/$/, '')
+    : ''
 
 export function googleOAuthURL(): string {
     return `${apiOrigin}/api/v1/auth/oauth/google`
