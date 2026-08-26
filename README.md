@@ -3,6 +3,8 @@
 SimpleToDo is a fullstack task management application, where users can create, edit, organize, and drag tasks between
 columns based on their status (pending, ongoing, completed, etc).
 
+Future product work is tracked in the [roadmap](docs/roadmap.md).
+
 It consists of:
 
 - A **React + TypeScript frontend**, using `@dnd-kit` for drag-and-drop functionality and `react-i18next` for
