@@ -2,8 +2,10 @@
 .idea
 .tmp
 build
+dist
 data
 vendor
+.pnpm-store
 web/dist
 web/node_modules
-internal/app/webdist
+web/.pnpm-store
