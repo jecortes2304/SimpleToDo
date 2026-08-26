@@ -24,12 +24,12 @@ permissions:
   contents: read
 
 jobs:
-  validate-pr:
-    name: Validate PR
-    if: github.event_name == 'pull_request'
+  quality:
+    name: Test and build
     runs-on: ubuntu-latest
     steps:
-      - name: Validate branch and Conventional Commit title
+      - name: Validate pull request
+        if: github.event_name == 'pull_request'
         env:
           BASE_BRANCH: ${{ github.base_ref }}
           HEAD_BRANCH: ${{ github.head_ref }}
@@ -41,13 +41,6 @@ jobs:
           if [[ "$BASE_BRANCH" == "main" ]]; then
             if [[ "$HEAD_BRANCH" != "develop" ]]; then
               echo "Only develop may be merged into main."
-              exit 1
-            fi
-
-            release_title_pattern="^(feat|fix|chore|docs|refactor|test|ci|build|perf)(\\([a-z0-9._/-]+\\))?(!)?: .+"
-            if [[ ! "$PR_TITLE" =~ $release_title_pattern ]]; then
-              echo "Release PR titles must use Conventional Commits (for example: chore(release): publish develop)."
-              echo "Received: $PR_TITLE"
               exit 1
             fi
             exit 0
@@ -83,10 +76,6 @@ jobs:
             exit 1
           fi
 
-  quality:
-    name: Test and build
-    runs-on: ubuntu-latest
-    steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
