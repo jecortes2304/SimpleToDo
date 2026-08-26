@@ -67,14 +67,19 @@ func applyMiddlewares(e *echo.Echo, showLogs *bool, corsOrigins *[]string, debug
 	e.Use(middleware.Recover())
 	e.Use(middleware.RequestID())
 
+	registerEmbeddedFrontend(e)
+}
+
+func registerEmbeddedFrontend(e *echo.Echo) {
 	e.Use(middleware.StaticWithConfig(middleware.StaticConfig{
 		Skipper: func(c echo.Context) bool {
 			path := c.Request().URL.Path
 			// Jump over API and Swagger paths to avoid serving static files for them.
 			return strings.HasPrefix(path, "/api") || strings.HasPrefix(path, "/swagger")
 		},
-		// Root directory from where the static content is served.
-		Root: "/",
+		// DistDirFS is already rooted at the frontend build directory. Keeping
+		// Root relative is required by embed.FS and avoids absolute paths.
+		Root: ".",
 		// Enable HTML5 mode by forwarding all not-found requests to root so that
 		// SPA (single-page application) can handle the routing.
 		HTML5:      true,
@@ -168,10 +173,6 @@ func SetUpRouters() error {
 
 	// Serve Swagger UI at /swagger/index.html
 	e.GET("/swagger/*", echoSwagger.WrapHandler)
-
-	// Serve static files from the embedded filesystem
-	e.FileFS("/", "index.html", embedfs.DistIndexHTML)
-	e.StaticFS("/", embedfs.DistDirFS)
 
 	if env.OpenBrowser {
 		go func() {

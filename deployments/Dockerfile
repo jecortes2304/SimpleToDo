@@ -1,6 +1,8 @@
 FROM node:24-alpine AS web-builder
 WORKDIR /source
-RUN corepack enable
+# Use exactly the pnpm version declared by the frontend.  Relying on
+# Corepack's current default makes image builds non-reproducible.
+RUN corepack enable && corepack install --global pnpm@11.21.0
 COPY web/package.json web/pnpm-lock.yaml ./web/
 RUN pnpm --dir web install --frozen-lockfile
 COPY web ./web
