@@ -1,0 +1,1875 @@
+basePath: /api/v1
+definitions:
+  request.AdminUpdateUserRequest:
+    properties:
+      firstName:
+        example: John
+        maxLength: 50
+        minLength: 2
+        type: string
+      image:
+        example: iVBORw0KGgoAAAANSUhEUgAA...
+        format: byte
+        maxLength: 5242880
+        type: string
+      lastName:
+        example: Doe
+        maxLength: 50
+        minLength: 2
+        type: string
+      password:
+        example: NewSecurePass123!
+        maxLength: 72
+        minLength: 8
+        type: string
+    type: object
+  request.AnalyzeImageRequest:
+    properties:
+      imageBase64:
+        type: string
+    required:
+    - imageBase64
+    type: object
+  request.CreateProjectRequestDto:
+    properties:
+      description:
+        example: This project aims to develop a new software solution for managing
+          tasks efficiently.
+        maxLength: 300
+        minLength: 20
+        type: string
+      name:
+        example: Project Alpha
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  request.CreateTaskRequestDto:
+    properties:
+      description:
+        example: This is the first task in the project.
+        maxLength: 300
+        minLength: 10
+        type: string
+      title:
+        example: Task 1
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - title
+    type: object
+  request.ForgotPasswordRequest:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+    required:
+    - email
+    type: object
+  request.LoginRequest:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+      password:
+        example: P@ssw0rd!
+        type: string
+    required:
+    - email
+    - password
+    type: object
+  request.RegisterRequest:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+      firstName:
+        example: John
+        maxLength: 100
+        minLength: 2
+        type: string
+      lastName:
+        example: Doe
+        maxLength: 100
+        minLength: 2
+        type: string
+      password:
+        example: P@ssw0rd!
+        maxLength: 50
+        minLength: 6
+        type: string
+      username:
+        example: jdoe
+        maxLength: 100
+        minLength: 2
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - password
+    - username
+    type: object
+  request.ResetPasswordRequest:
+    properties:
+      newPassword:
+        example: NewP@ss123
+        maxLength: 50
+        minLength: 6
+        type: string
+      token:
+        example: 6a1fbd97e8...<rest_of_token>
+        minLength: 64
+        type: string
+    required:
+    - newPassword
+    - token
+    type: object
+  request.UpdateAISettingsRequest:
+    properties:
+      apiKey:
+        type: string
+      baseUrl:
+        type: string
+      model:
+        type: string
+    required:
+    - apiKey
+    - baseUrl
+    - model
+    type: object
+  request.UpdateProjectRequestDto:
+    properties:
+      description:
+        example: This project aims to develop a new software solution for managing
+          tasks efficiently.
+        maxLength: 300
+        minLength: 20
+        type: string
+      name:
+        example: Project Alpha
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - name
+    type: object
+  request.UpdateTaskRequestDto:
+    properties:
+      description:
+        example: This is the first task in the project.
+        maxLength: 300
+        minLength: 10
+        type: string
+      status:
+        enum:
+        - pending
+        - ongoing
+        - completed
+        - blocked
+        - cancelled
+        example: pending
+        type: string
+      title:
+        example: Task 1
+        maxLength: 100
+        minLength: 5
+        type: string
+    required:
+    - description
+    - status
+    - title
+    type: object
+  request.UpdateUserRequest:
+    properties:
+      email:
+        example: john.doe@example.com
+        type: string
+      firstName:
+        example: John
+        maxLength: 50
+        minLength: 2
+        type: string
+      image:
+        example: iVBORw0KGgoAAAANSUhEUgAA...
+        format: byte
+        type: string
+      lastName:
+        example: Doe
+        maxLength: 50
+        minLength: 2
+        type: string
+    type: object
+  request.UpsertPromptRequest:
+    properties:
+      description:
+        type: string
+      systemPrompt:
+        type: string
+      title:
+        maxLength: 150
+        type: string
+    type: object
+  response.AISettingsResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.AISettingsResponseDto'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.AISettingsResponseDto:
+    properties:
+      apiKey:
+        type: string
+      baseUrl:
+        type: string
+      model:
+        type: string
+    type: object
+  response.AuthProvidersResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.AuthProvidersResult'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.AuthProvidersResult:
+    properties:
+      google:
+        example: true
+        type: boolean
+    type: object
+  response.CurrentUserResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.CurrentUserResult'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.CurrentUserResult:
+    properties:
+      email:
+        example: jdoe@example.com
+        type: string
+      id:
+        example: 1
+        type: integer
+      role:
+        example: USER
+        type: string
+    type: object
+  response.EmptyResponse:
+    properties:
+      result:
+        type: object
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.LoginResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.LoginResult'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.LoginResult:
+    properties:
+      token:
+        example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+        type: string
+    type: object
+  response.ProjectResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.ProjectResponseDto'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.ProjectResponseDto:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+      tasks:
+        items:
+          $ref: '#/definitions/response.TaskResponseForProjectDto'
+        type: array
+      updatedAt:
+        type: string
+    type: object
+  response.ProjectsPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.ProjectResponseDto'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      search:
+        example: website
+        type: string
+      sort:
+        example: id desc
+        type: string
+      totalItems:
+        example: 24
+        type: integer
+      totalPages:
+        example: 3
+        type: integer
+    type: object
+  response.ProjectsResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.ProjectsPage'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.PromptItemResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.PromptResponse'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.PromptResponse:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      systemPrompt:
+        type: string
+      title:
+        maxLength: 150
+        type: string
+      updatedAt:
+        type: string
+    required:
+    - systemPrompt
+    - title
+    type: object
+  response.PromptsPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.PromptResponse'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      search:
+        example: extract task
+        type: string
+      sort:
+        example: id desc
+        type: string
+      totalItems:
+        example: 24
+        type: integer
+      totalPages:
+        example: 3
+        type: integer
+    type: object
+  response.PromptsResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.PromptsPage'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.StandardResponseError:
+    properties:
+      errors:
+        items:
+          type: string
+        type: array
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.StringResponse:
+    properties:
+      result:
+        example: OK
+        type: string
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.TaskResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.TaskResponseDto'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.TaskResponseDto:
+    properties:
+      createdAt:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      projectId:
+        type: integer
+      status:
+        type: string
+      statusId:
+        type: integer
+      title:
+        type: string
+      updatedAt:
+        type: string
+      userId:
+        type: integer
+    required:
+    - title
+    type: object
+  response.TaskResponseForProjectDto:
+    properties:
+      description:
+        type: string
+      id:
+        type: integer
+      projectId:
+        type: integer
+      statusId:
+        type: integer
+      title:
+        type: string
+      userId:
+        type: integer
+    required:
+    - title
+    type: object
+  response.TasksPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.TaskResponseDto'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      search:
+        example: documentation
+        type: string
+      sort:
+        example: id desc
+        type: string
+      totalItems:
+        example: 24
+        type: integer
+      totalPages:
+        example: 3
+        type: integer
+    type: object
+  response.TasksResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.TasksPage'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.UserResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.UserResponseDto'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+  response.UserResponseDto:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      image:
+        example: iVBORw0KGgoAAAANSUhEUgAA...
+        format: byte
+        type: string
+      lastName:
+        type: string
+      role:
+        type: string
+      username:
+        type: string
+    type: object
+  response.UsersPage:
+    properties:
+      items:
+        items:
+          $ref: '#/definitions/response.UserResponseDto'
+        type: array
+      limit:
+        example: 10
+        type: integer
+      page:
+        example: 1
+        type: integer
+      search:
+        example: john
+        type: string
+      sort:
+        example: id desc
+        type: string
+      totalItems:
+        example: 24
+        type: integer
+      totalPages:
+        example: 3
+        type: integer
+    type: object
+  response.UsersResponse:
+    properties:
+      result:
+        $ref: '#/definitions/response.UsersPage'
+      statusCode:
+        type: integer
+      statusMessage:
+        type: string
+    type: object
+host: localhost:8000
+info:
+  contact: {}
+  description: |-
+    REST API for SimpleTodo. All responses use statusCode and statusMessage; successful payloads are returned in result and failures in errors.
+    Protected operations accept a JWT through Authorization: Bearer <token>. The web client may alternatively use the HTTP-only auth cookie set by login.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  title: simpletodo API
+  version: 1.0.0
+paths:
+  /auth/forgot:
+    post:
+      consumes:
+      - application/json
+      description: Send password reset email if account exists
+      parameters:
+      - description: Forgot password payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Forgot password
+      tags:
+      - Auth
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticate a user and set a JWT in HTTP-only cookie
+      parameters:
+      - description: Login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.LoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT returned; web clients also receive an HTTP-only cookie
+          schema:
+            $ref: '#/definitions/response.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Login
+      tags:
+      - Auth
+  /auth/logout:
+    delete:
+      description: Invalidate user session by clearing auth cookie
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StringResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Logout
+      tags:
+      - Auth
+  /auth/me:
+    get:
+      description: Returns basic info from the JWT claims
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.CurrentUserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get current authenticated user
+      tags:
+      - Auth
+  /auth/oauth/google:
+    get:
+      description: Redirects the browser to Google OpenID Connect
+      produces:
+      - application/json
+      responses:
+        "302":
+          description: Redirect to Google
+          schema:
+            type: string
+        "503":
+          description: Service Unavailable
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Start Google authentication
+      tags:
+      - Auth
+  /auth/oauth/google/callback:
+    get:
+      description: Validates the OAuth state and Google profile, then redirects to
+        the application
+      parameters:
+      - description: Google authorization code
+        in: query
+        name: code
+        type: string
+      - description: OAuth anti-CSRF state
+        in: query
+        name: state
+        type: string
+      - description: Google authorization error
+        in: query
+        name: error
+        type: string
+      responses:
+        "302":
+          description: Redirect to the application
+          schema:
+            type: string
+      summary: Complete Google authentication
+      tags:
+      - Auth
+  /auth/providers:
+    get:
+      description: Returns the social authentication providers configured on this
+        server
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AuthProvidersResponse'
+      summary: List authentication providers
+      tags:
+      - Auth
+  /auth/register:
+    post:
+      consumes:
+      - application/json
+      description: Create a new user and send verification email
+      parameters:
+      - description: Register payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.RegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Register
+      tags:
+      - Auth
+  /auth/resend-verification:
+    post:
+      consumes:
+      - application/json
+      description: Resend email verification link if the user is not verified
+      parameters:
+      - description: Resend verification payload (email)
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ForgotPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Resend verification email
+      tags:
+      - Auth
+  /auth/reset:
+    post:
+      consumes:
+      - application/json
+      description: Reset password using a one-time token sent by email
+      parameters:
+      - description: Reset password payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.ResetPasswordRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Reset password
+      tags:
+      - Auth
+  /auth/verify-email:
+    post:
+      consumes:
+      - application/json
+      description: Verify user email using a token sent after registration
+      parameters:
+      - description: Email verification token
+        in: query
+        name: token
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      summary: Verify email
+      tags:
+      - Auth
+  /profile:
+    get:
+      description: Retrieve the profile of the authenticated user
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get current user profile
+      tags:
+      - Profile
+    patch:
+      consumes:
+      - application/json
+      description: Update the profile of the authenticated user
+      parameters:
+      - description: Profile update payload
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateUserRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update current user profile
+      tags:
+      - Profile
+  /profile/ai-settings:
+    get:
+      description: Get the current user's AI server configuration
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AISettingsResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get AI Settings
+      tags:
+      - Profile
+    put:
+      description: Update the current user's AI server configuration
+      parameters:
+      - description: AI Settings payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateAISettingsRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AISettingsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update AI Settings
+      tags:
+      - Profile
+  /projects:
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search by project name or description
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ProjectsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all projects
+      tags:
+      - Projects
+  /projects/project:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateProjectRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.ProjectResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create a new project
+      tags:
+      - Projects
+  /projects/project/{id}:
+    delete:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StringResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete a project by ID
+      tags:
+      - Projects
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ProjectResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get a project by ID
+      tags:
+      - Projects
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Project data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateProjectRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ProjectResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update a project by ID
+      tags:
+      - Projects
+  /projects/user:
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search by project name or description
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.ProjectsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all projects for the current user
+      tags:
+      - Projects
+  /prompts:
+    get:
+      description: Retrieve a paginated list of all prompts (Admin only)
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search by title, description or system prompt
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PromptsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get all prompts
+      tags:
+      - Prompts
+    post:
+      consumes:
+      - application/json
+      description: Create a new AI system prompt (Admin only)
+      parameters:
+      - description: Create Prompt payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpsertPromptRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.PromptItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create Prompt
+      tags:
+      - Prompts
+  /prompts/{id}:
+    delete:
+      description: Delete a specific prompt (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete Prompt
+      tags:
+      - Prompts
+    get:
+      description: Retrieve details of a specific prompt (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PromptItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get Prompt by ID
+      tags:
+      - Prompts
+    put:
+      description: Update prompt details (Admin only)
+      parameters:
+      - description: Prompt ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Prompt payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpsertPromptRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PromptItemResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update Prompt
+      tags:
+      - Prompts
+  /tasks:
+    delete:
+      parameters:
+      - description: Comma-separated task IDs
+        in: query
+        name: ids
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.StringResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete multiple tasks by IDs
+      tags:
+      - Tasks
+    get:
+      parameters:
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TasksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all tasks for the current user
+      tags:
+      - Tasks
+  /tasks/{projectId}:
+    get:
+      parameters:
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: integer
+      - default: 10
+        description: Limit per page
+        in: query
+        name: limit
+        type: integer
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Filter by task title
+        in: query
+        name: taskTitle
+        type: string
+      - description: Filter by status
+        enum:
+        - pending
+        - ongoing
+        - completed
+        - blocked
+        - cancelled
+        in: query
+        name: status
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TasksResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: List all tasks by project for the current user
+      tags:
+      - Tasks
+  /tasks/task/{id}:
+    get:
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get a task by ID
+      tags:
+      - Tasks
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Task ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.UpdateTaskRequestDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update a task by ID
+      tags:
+      - Tasks
+  /tasks/task/{projectId}:
+    post:
+      consumes:
+      - application/json
+      parameters:
+      - description: Project ID
+        in: path
+        name: projectId
+        required: true
+        type: integer
+      - description: Task data
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.CreateTaskRequestDto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Create a new task in a project
+      tags:
+      - Tasks
+  /users:
+    get:
+      description: Retrieve a paginated list of all users (Admin only)
+      parameters:
+      - description: Page number
+        in: query
+        name: page
+        type: integer
+      - description: Items per page
+        in: query
+        name: limit
+        type: integer
+      - default: asc
+        description: Sort order
+        enum:
+        - asc
+        - desc
+        in: query
+        name: sort
+        type: string
+      - description: Search by name, email or username
+        in: query
+        name: search
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UsersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get all users
+      tags:
+      - Users
+  /users/user/{id}:
+    delete:
+      description: Delete a specific user by ID (Admin only, cannot delete admin users)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.EmptyResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - Users
+    get:
+      description: Retrieve details of a specific user by ID (Admin only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
+      tags:
+      - Users
+    put:
+      description: Update a user's name, avatar and optionally reset their password.
+        The email address cannot be changed (Admin only).
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Administrative user update payload (email is immutable)
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/request.AdminUpdateUserRequest'
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Update user
+      tags:
+      - Users
+  /vision/analyze/{projectId}:
+    post:
+      consumes:
+      - application/json
+      description: Extract task details from image using AI with User settings
+      parameters:
+      - description: Project ID that will own the generated task
+        in: path
+        name: projectId
+        required: true
+        type: integer
+      - description: Base64 Image
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/request.AnalyzeImageRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TaskResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.StandardResponseError'
+      security:
+      - BearerAuth: []
+      summary: Analyze Image
+      tags:
+      - Vision
+schemes:
+- http
+securityDefinitions:
+  BearerAuth:
+    description: 'Provide your JWT as: Bearer <token>'
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
